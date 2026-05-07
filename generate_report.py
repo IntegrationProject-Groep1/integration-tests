@@ -11,6 +11,7 @@ import subprocess
 import sys
 import json
 import re
+import os
 from pathlib import Path
 from datetime import datetime, timezone
 import xml.etree.ElementTree as ET
@@ -19,9 +20,11 @@ import xml.etree.ElementTree as ET
 def run_tests():
     """Run pytest with JSON output and capture results."""
     junit_path = Path(__file__).parent / "pytest_junit.xml"
+    reuse_existing = os.getenv("READINESS_USE_EXISTING_JUNIT", "0") == "1"
 
-    # If a junit xml already exists (e.g., produced by CI step), reuse it and skip running pytest here.
-    if junit_path.exists():
+    # Reuse an existing JUnit XML only when explicitly requested via env var.
+    # This prevents stale committed artifacts from masking current test results.
+    if reuse_existing and junit_path.exists():
         # Provide empty stdout/stderr but return the existing path
         return "", "", 0, junit_path
 

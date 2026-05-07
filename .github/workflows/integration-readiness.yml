@@ -120,6 +120,8 @@ jobs:
 
       - name: Generate readiness report
         if: always()
+        env:
+          READINESS_USE_EXISTING_JUNIT: "1"
         run: |
           cd integration-tests
           python generate_report.py
