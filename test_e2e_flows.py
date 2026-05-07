@@ -12,7 +12,7 @@ Notes:
 """
 import os
 import pytest
-from integration_tests.helpers import e2e_utils as utils  # type: ignore
+from helpers import e2e_utils as utils  # type: ignore
 
 
 @pytest.mark.e2e

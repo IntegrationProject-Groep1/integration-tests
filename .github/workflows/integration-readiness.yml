@@ -107,7 +107,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install lxml
+          pip install lxml pytest pika
           pip install -r identity-service/requirements.txt
 
       - name: Run integration contract tests
@@ -115,10 +115,13 @@ jobs:
           # The workspace root now contains all the service folders as siblings to integration-tests
           export INTEGRATION_REPO_ROOT=$GITHUB_WORKSPACE
           cd integration-tests
-          python -m pytest -v --tb=short --no-header 2>&1 | tee test-output.txt
+          # Produce JUnit XML for the report generator
+          python -m pytest -v --tb=short --no-header --junitxml=pytest_junit.xml 2>&1 | tee test-output.txt
 
       - name: Generate readiness report
         if: always()
+        env:
+          READINESS_USE_EXISTING_JUNIT: "1"
         run: |
           cd integration-tests
           python generate_report.py
@@ -136,3 +139,53 @@ jobs:
           if [ -f integration-tests/readiness-report.md ]; then
             cat integration-tests/readiness-report.md >> $GITHUB_STEP_SUMMARY
           fi
+
+  e2e-tests:
+    name: "E2E Tests (manual)"
+    runs-on: ubuntu-latest
+    needs: integration-tests
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout all repos
+        uses: actions/checkout@v4
+        with:
+          path: integration-tests
+
+      - name: Checkout additional repositories
+        uses: actions/checkout@v4
+        with:
+          repository: IntegrationProject-Groep1/CRM
+          path: CRM
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Set up Docker Compose
+        run: |
+          sudo apt-get update && sudo apt-get install -y docker-compose
+
+      - name: Start full stack
+        run: |
+          cd ..
+          docker-compose up -d
+
+      - name: Wait for services
+        run: |
+          sleep 20
+
+      - name: Run gated E2E tests
+        run: |
+          cd integration-tests
+          export RUN_E2E=1
+          python -m pytest -v -k e2e --junitxml=pytest_junit_e2e.xml
+
+      - name: Upload E2E junit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-e2e-junit
+          path: integration-tests/pytest_junit_e2e.xml
+
+      - name: Teardown stack
+        if: always()
+        run: |
+          cd ..
+          docker-compose down
