@@ -55,6 +55,13 @@ def parse_results(stdout: str, junit_path: Path = None):
     tests = []
     dod_tests = []
 
+    def build_failure_details(element):
+        message = (element.get("message") or "").strip()
+        text = (element.text or "").strip()
+        if message and text:
+            return f"{message} — {text.splitlines()[0].strip()}"
+        return message or text
+
     # If junit xml exists, parse it for reliable results
     if junit_path and junit_path.exists():
         try:
@@ -68,15 +75,20 @@ def parse_results(stdout: str, junit_path: Path = None):
                 identifier = f"{classname}::{name}" if classname else name
 
                 status = 'PASSED'
-                if tc.find('failure') is not None or tc.find('error') is not None:
+                details = ""
+                failure_element = tc.find('failure')
+                error_element = tc.find('error')
+                if failure_element is not None or error_element is not None:
                     status = 'FAILED'
+                    failure_element = failure_element if failure_element is not None else error_element
+                    details = build_failure_details(failure_element) if failure_element is not None else ""
                 elif tc.find('skipped') is not None:
                     status = 'SKIPPED'
 
                 if 'test_dod_checks' in (classname or '') or identifier.startswith('TestDoD_'):
-                    dod_tests.append({'name': identifier, 'status': status})
+                    dod_tests.append({'name': identifier, 'status': status, 'details': details})
                 else:
-                    tests.append({'name': identifier, 'status': status})
+                    tests.append({'name': identifier, 'status': status, 'details': details})
 
             return tests, dod_tests
         except Exception:
@@ -91,10 +103,18 @@ def parse_results(stdout: str, junit_path: Path = None):
             full_name = match.group(2)
             status = match.group(3)
             if file_type == "test_dod_checks.py":
-                dod_tests.append({"name": full_name, "status": status})
+                dod_tests.append({"name": full_name, "status": status, "details": ""})
             else:
-                tests.append({"name": full_name, "status": status})
+                tests.append({"name": full_name, "status": status, "details": ""})
     return tests, dod_tests
+
+
+def format_finding(test):
+    """Format a failing test as a concise finding line."""
+    details = test.get("details", "").strip()
+    if details:
+        return f"- ❌ `{test['name']}` — {details}"
+    return f"- ❌ `{test['name']}`"
 
 
 # Map test classes to team integration points
@@ -415,6 +435,17 @@ def generate_report(tests, dod_tests):
     # Per-team breakdown
     lines.append("## Per-Team Status")
     lines.append("")
+
+    # High-signal summary of actual failures
+    failing_findings = [t for t in tests + dod_tests if t["status"] in {"FAILED", "ERROR"}]
+    if failing_findings:
+        lines.append("## Findings")
+        lines.append("")
+        lines.append("The following checks failed in the most recent run:")
+        lines.append("")
+        for test in failing_findings:
+            lines.append(format_finding(test))
+        lines.append("")
 
     # Collect per-team stats
     team_stats = {}

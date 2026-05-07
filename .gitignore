@@ -183,3 +183,5 @@ cython_debug/
 # Generated test artifacts
 pytest_junit*.xml
 test-output.txt
+test-output2.txt
+readiness-report.md
