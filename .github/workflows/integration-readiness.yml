@@ -1,3 +1,11 @@
+###############################################################################
+# Integration Readiness CI — Desideriushogeschool Event Platform
+#
+# PURPOSE:
+#   This central hub checks out all service repositories in the organization
+#   to validate cross-team XML/XSD compatibility.
+###############################################################################
+
 name: "🔗 Integration Readiness"
 
 on:
@@ -6,6 +14,8 @@ on:
   pull_request:
     branches: [main, dev]
   workflow_dispatch:
+  repository_dispatch:
+    types: [trigger-integration-tests]
 
 jobs:
   integration-tests:
@@ -14,8 +24,75 @@ jobs:
     continue-on-error: true
 
     steps:
-      - name: Checkout repository
+      - name: Checkout integration-tests (Self)
         uses: actions/checkout@v4
+        with:
+          path: integration-tests
+
+      # Checkout all other service repositories to get their XSD schemas
+      # We use the PAT_TOKEN secret which must be set in the integration-tests repo
+      - name: Checkout Frontend
+        uses: actions/checkout@v4
+        with:
+          repository: IntegrationProject-Groep1/IP-groep1-frontend
+          path: IP-groep1-frontend
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Checkout CRM
+        uses: actions/checkout@v4
+        with:
+          repository: IntegrationProject-Groep1/CRM
+          path: CRM
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Checkout Kassa
+        uses: actions/checkout@v4
+        with:
+          repository: IntegrationProject-Groep1/Kassa
+          path: Kassa
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Checkout Planning
+        uses: actions/checkout@v4
+        with:
+          repository: IntegrationProject-Groep1/Planning
+          path: Planning
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Checkout Facturatie
+        uses: actions/checkout@v4
+        with:
+          repository: IntegrationProject-Groep1/Facturatie
+          path: Facturatie
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Checkout Mailing
+        uses: actions/checkout@v4
+        with:
+          repository: IntegrationProject-Groep1/Mailing
+          path: Mailing
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Checkout Monitoring
+        uses: actions/checkout@v4
+        with:
+          repository: IntegrationProject-Groep1/monitoring
+          path: monitoring
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Checkout Heartbeat
+        uses: actions/checkout@v4
+        with:
+          repository: IntegrationProject-Groep1/heartbeat
+          path: heartbeat
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Checkout Identity Service
+        uses: actions/checkout@v4
+        with:
+          repository: IntegrationProject-Groep1/identity-service
+          path: identity-service
+          token: ${{ secrets.PAT_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -27,22 +104,27 @@ jobs:
 
       - name: Run integration contract tests
         run: |
+          # The workspace root now contains all the service folders as siblings to integration-tests
+          export INTEGRATION_REPO_ROOT=$GITHUB_WORKSPACE
+          cd integration-tests
           python -m pytest test_contracts.py test_dod_checks.py -v --tb=short --no-header 2>&1 | tee test-output.txt
 
       - name: Generate readiness report
         if: always()
-        run: python generate_report.py
+        run: |
+          cd integration-tests
+          python generate_report.py
 
       - name: Upload readiness report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: integration-readiness-report
-          path: readiness-report.md
+          path: integration-tests/readiness-report.md
 
       - name: Post summary to GitHub
         if: always()
         run: |
-          if [ -f readiness-report.md ]; then
-            cat readiness-report.md >> $GITHUB_STEP_SUMMARY
+          if [ -f integration-tests/readiness-report.md ]; then
+            cat integration-tests/readiness-report.md >> $GITHUB_STEP_SUMMARY
           fi
