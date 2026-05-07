@@ -1,14 +1,14 @@
 # 🔗 Integration Readiness Report
 
-> **Generated**: 2026-05-07 20:01 UTC  
+> **Generated**: 2026-05-07 20:10 UTC  
 > **Deadline**: 2026-05-10 23:59 CET  
 > **Generale repetitie**: 13/05/2026 10:00 Aula 6
 
-## Overall Progress: 60/66 (90%)
+## Overall Progress: 65/66 (98%)
 ```
-██████████████████░░ 90%
+███████████████████░ 98%
 ```
-✅ Passed: 60 | ❌ Failed: 5 | ⏭️ Skipped: 1
+✅ Passed: 65 | ❌ Failed: 0 | ⏭️ Skipped: 1
 
 ## Per-Team Status
 
