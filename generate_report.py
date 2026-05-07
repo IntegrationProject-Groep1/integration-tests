@@ -396,11 +396,19 @@ ALL_TEAMS = ["Frontend", "CRM", "Kassa", "Facturatie", "Planning", "Mailing", "M
 
 
 def classify_test(test_name: str):
-    """Extract class name from pytest test identifier."""
+    """Extract class name from pytest test identifier.
+    
+    Converts pytest JUnit identifiers like:
+      'test_contracts.TestR1_FrontendToCRM_NewRegistration::test_method'
+    To:
+      'TestR1_FrontendToCRM_NewRegistration'
+    """
     parts = test_name.split("::")
-    if len(parts) >= 1:
-        return parts[0]
-    return test_name
+    classname_with_module = parts[0] if len(parts) >= 1 else test_name
+    # Remove module prefix (everything before the last dot)
+    if "." in classname_with_module:
+        return classname_with_module.split(".")[-1]
+    return classname_with_module
 
 
 def generate_report(tests, dod_tests):
