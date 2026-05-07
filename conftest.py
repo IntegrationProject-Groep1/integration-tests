@@ -6,8 +6,8 @@ import pytest
 from pathlib import Path
 from lxml import etree
 
-# Root of the monorepo
-REPO_ROOT = Path(__file__).resolve().parent.parent
+# Root of the monorepo (can be overridden in CI)
+REPO_ROOT = Path(os.getenv("INTEGRATION_REPO_ROOT", Path(__file__).resolve().parent.parent))
 
 
 def load_xsd(xsd_path: Path) -> etree.XMLSchema:

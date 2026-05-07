@@ -1,0 +1,72 @@
+###############################################################################
+# Integration Readiness CI — Desideriushogeschool Event Platform
+#
+# This workflow runs the integration contract tests.
+# It can be triggered by push, pull_request, manually, or via API.
+###############################################################################
+
+name: "🔗 Integration Readiness"
+
+on:
+  push:
+    branches: ["*"]
+  pull_request:
+    branches: [main, dev]
+  workflow_dispatch:
+  repository_dispatch:
+    types: [trigger-integration-tests]
+
+jobs:
+  integration-tests:
+    name: "Integration Contract Tests"
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    steps:
+      - name: Checkout integration-tests
+        uses: actions/checkout@v4
+        with:
+          path: integration-tests
+
+      - name: Checkout Monorepo (for XSDs)
+        uses: actions/checkout@v4
+        with:
+          repository: IntegrationProject-Groep1/Repo-IntegrationProject # Assuming this is the monorepo name
+          path: monorepo
+          token: ${{ secrets.PAT_TOKEN }} # Needed if the monorepo is private
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install lxml pytest pytest-md
+
+      - name: Run integration contract tests
+        run: |
+          # We run from the integration-tests folder
+          # But we tell the tests where the monorepo root is so it can find XSDs
+          export INTEGRATION_REPO_ROOT=$GITHUB_WORKSPACE/monorepo
+          cd integration-tests
+          python -m pytest test_contracts.py test_dod_checks.py -v --tb=short --no-header 2>&1 | tee test-output.txt
+
+      - name: Generate readiness report
+        if: always()
+        run: |
+          cd integration-tests
+          python generate_report.py
+
+      - name: Upload readiness report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-readiness-report
+          path: integration-tests/readiness-report.md
+
+      - name: Post summary to GitHub
+        if: always()
+        run: |
+          if [ -f integration-tests/readiness-report.md ]; then
+            cat integration-tests/readiness-report.md >> $GITHUB_STEP_SUMMARY
+          fi
