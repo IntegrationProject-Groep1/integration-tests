@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 def run_tests():
     """Run pytest with JSON output and capture results."""
     result = subprocess.run(
-        [sys.executable, "-m", "pytest", "test_contracts.py", "test_dod_checks.py", "-v", "--tb=line", "--no-header"],
+        [sys.executable, "-m", "pytest", "-v", "--tb=line", "--no-header"],
         capture_output=True,
         text=True,
         cwd=Path(__file__).parent,
@@ -32,16 +32,16 @@ def parse_results(stdout: str):
     dod_tests = []
     for line in stdout.splitlines():
         # Match lines like: test_contracts.py::TestClass::test_method PASSED
-        # Also handles potential path separators
-        match = re.search(r"(test_contracts\.py|test_dod_checks\.py)::(\S+)\s+(PASSED|FAILED|ERROR|SKIPPED)", line)
+        # Also handles potential path separators and newly added test files.
+        match = re.search(r"(test_[^:]+\.py)::(\S+)\s+(PASSED|FAILED|ERROR|SKIPPED)", line)
         if match:
             file_type = match.group(1)
             full_name = match.group(2)
             status = match.group(3)
-            if file_type == "test_contracts.py":
-                tests.append({"name": full_name, "status": status})
-            else:
+            if file_type == "test_dod_checks.py":
                 dod_tests.append({"name": full_name, "status": status})
+            else:
+                tests.append({"name": full_name, "status": status})
     return tests, dod_tests
 
 
@@ -160,6 +160,12 @@ TEAM_MAP = {
         "receiver": "Facturatie",
         "flow": "F·2 Factuur annuleren",
         "message": "invoice_cancelled",
+    },
+    "TestIdentityServiceContract": {
+        "sender": "Identity Service",
+        "receiver": "Identity Service",
+        "flow": "I·1 Identity service contract",
+        "message": "identity_service_contract",
     },
     "TestO1_Heartbeat": {
         "sender": "Sidecar",
@@ -314,7 +320,7 @@ TEAM_MAP = {
 }
 
 # All teams
-ALL_TEAMS = ["Frontend", "CRM", "Kassa", "Facturatie", "Planning", "Mailing", "Monitoring", "Sidecar"]
+ALL_TEAMS = ["Frontend", "CRM", "Kassa", "Facturatie", "Planning", "Mailing", "Monitoring", "Sidecar", "Identity Service"]
 
 
 def classify_test(test_name: str):
@@ -370,12 +376,14 @@ def generate_report(tests, dod_tests):
             continue
 
         status_icon = {"PASSED": "✅", "FAILED": "❌", "SKIPPED": "⏭️", "ERROR": "💥"}.get(test["status"], "❓")
+        matched_teams = set()
 
         for team_key in ["sender", "receiver"]:
             team_name = info[team_key]
             # Handle cross-team names
             for team in ALL_TEAMS:
-                if team in team_name:
+                if team in team_name and team not in matched_teams:
+                    matched_teams.add(team)
                     team_stats[team]["total"] += 1
                     if test["status"] == "PASSED":
                         team_stats[team]["pass"] += 1
@@ -461,7 +469,6 @@ def generate_report(tests, dod_tests):
     lines.append("The following integration points are documented in the flows but don't have")
     lines.append("XSD schemas from both sides yet, so we can't test them:")
     lines.append("")
-    lines.append("- `identity_request / identity_response` — RPC (Identity Service)")
     lines.append("- `wallet_lease_request` / `wallet_lease_return` — Kassa ↔ CRM")
     lines.append("- `session_registration_confirmed` — CRM → Planning")
     lines.append("- `refund_processed` — Kassa → CRM")

@@ -29,70 +29,68 @@ jobs:
         with:
           path: integration-tests
 
-      # Checkout all other service repositories to get their XSD schemas
-      # We use the PAT_TOKEN secret which must be set in the integration-tests repo
-      - name: Checkout Frontend
-        uses: actions/checkout@v4
-        with:
-          repository: IntegrationProject-Groep1/IP-groep1-frontend
-          path: IP-groep1-frontend
-          token: ${{ secrets.PAT_TOKEN }}
+      - name: Checkout organization repositories
+        env:
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+          GITHUB_ORG: IntegrationProject-Groep1
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import subprocess
+          import urllib.parse
+          import urllib.request
+          from pathlib import Path
 
-      - name: Checkout CRM
-        uses: actions/checkout@v4
-        with:
-          repository: IntegrationProject-Groep1/CRM
-          path: CRM
-          token: ${{ secrets.PAT_TOKEN }}
+          org = os.environ["GITHUB_ORG"]
+          token = os.environ["PAT_TOKEN"]
+          workspace = Path(os.environ["GITHUB_WORKSPACE"])
+          seen: set[str] = set()
+          page = 1
 
-      - name: Checkout Kassa
-        uses: actions/checkout@v4
-        with:
-          repository: IntegrationProject-Groep1/Kassa
-          path: Kassa
-          token: ${{ secrets.PAT_TOKEN }}
+          while True:
+              url = (
+                  f"https://api.github.com/orgs/{urllib.parse.quote(org)}/repos"
+                  f"?per_page=100&page={page}&type=all&sort=full_name"
+              )
+              request = urllib.request.Request(
+                  url,
+                  headers={
+                      "Accept": "application/vnd.github+json",
+                      "Authorization": f"Bearer {token}",
+                      "X-GitHub-Api-Version": "2022-11-28",
+                  },
+              )
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  repos = json.load(response)
 
-      - name: Checkout Planning
-        uses: actions/checkout@v4
-        with:
-          repository: IntegrationProject-Groep1/Planning
-          path: Planning
-          token: ${{ secrets.PAT_TOKEN }}
+              if not repos:
+                  break
 
-      - name: Checkout Facturatie
-        uses: actions/checkout@v4
-        with:
-          repository: IntegrationProject-Groep1/Facturatie
-          path: Facturatie
-          token: ${{ secrets.PAT_TOKEN }}
+              for repo in repos:
+                  repo_name = str(repo["name"])
+                  if repo_name == "integration-tests" or repo_name in seen:
+                      continue
 
-      - name: Checkout Mailing
-        uses: actions/checkout@v4
-        with:
-          repository: IntegrationProject-Groep1/Mailing
-          path: Mailing
-          token: ${{ secrets.PAT_TOKEN }}
+                  seen.add(repo_name)
+                  target = workspace / repo_name
+                  clone_url = f"https://github.com/{org}/{repo_name}.git"
+                  subprocess.run(
+                      [
+                          "git",
+                          "-c",
+                          f"http.https://github.com/.extraheader=AUTHORIZATION: bearer {token}",
+                          "clone",
+                          "--depth",
+                          "1",
+                          clone_url,
+                          str(target),
+                      ],
+                      check=True,
+                  )
 
-      - name: Checkout Monitoring
-        uses: actions/checkout@v4
-        with:
-          repository: IntegrationProject-Groep1/monitoring
-          path: monitoring
-          token: ${{ secrets.PAT_TOKEN }}
-
-      - name: Checkout Heartbeat
-        uses: actions/checkout@v4
-        with:
-          repository: IntegrationProject-Groep1/heartbeat
-          path: heartbeat
-          token: ${{ secrets.PAT_TOKEN }}
-
-      - name: Checkout Identity Service
-        uses: actions/checkout@v4
-        with:
-          repository: IntegrationProject-Groep1/identity-service
-          path: identity-service
-          token: ${{ secrets.PAT_TOKEN }}
+              page += 1
+          PY
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -100,14 +98,17 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install lxml pytest pytest-md
+        run: |
+          python -m pip install --upgrade pip
+          pip install lxml
+          pip install -r identity-service/requirements.txt
 
       - name: Run integration contract tests
         run: |
           # The workspace root now contains all the service folders as siblings to integration-tests
           export INTEGRATION_REPO_ROOT=$GITHUB_WORKSPACE
           cd integration-tests
-          python -m pytest test_contracts.py test_dod_checks.py -v --tb=short --no-header 2>&1 | tee test-output.txt
+          python -m pytest -v --tb=short --no-header 2>&1 | tee test-output.txt
 
       - name: Generate readiness report
         if: always()

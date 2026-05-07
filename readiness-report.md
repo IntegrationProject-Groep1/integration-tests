@@ -1,14 +1,14 @@
 # 🔗 Integration Readiness Report
 
-> **Generated**: 2026-05-07 12:41 UTC  
+> **Generated**: 2026-05-07 13:45 UTC  
 > **Deadline**: 2026-05-10 23:59 CET  
 > **Generale repetitie**: 13/05/2026 10:00 Aula 6
 
-## Overall Progress: 56/61 (91%)
+## Overall Progress: 60/65 (92%)
 ```
-██████████████████░░ 91%
+██████████████████░░ 92%
 ```
-✅ Passed: 56 | ❌ Failed: 5 | ⏭️ Skipped: 0
+✅ Passed: 60 | ❌ Failed: 5 | ⏭️ Skipped: 0
 
 ## Per-Team Status
 
@@ -22,6 +22,7 @@
 | **Mailing** | 🟢 Ready | 3 | 0 | 0 | 100% |
 | **Monitoring** | 🟢 Ready | 4 | 0 | 0 | 100% |
 | **Sidecar** | 🟢 Ready | 1 | 0 | 0 | 100% |
+| **Identity Service** | 🟢 Ready | 4 | 0 | 0 | 100% |
 
 ## Detailed Results per Team
 
@@ -162,6 +163,14 @@
 #### Integration Contracts
   ✅ `heartbeat` (O·1 Heartbeat) — test_heartbeat_validates_against_heartbeat_xsd
 
+### Identity Service
+
+#### Integration Contracts
+  ✅ `identity_service_contract` (I·1 Identity service contract) — test_create_user_is_idempotent_and_normalizes_email
+  ✅ `identity_service_contract` (I·1 Identity service contract) — test_build_ok_response_contains_master_uuid_contract
+  ✅ `identity_service_contract` (I·1 Identity service contract) — test_build_error_response_contains_expected_fields
+  ✅ `identity_service_contract` (I·1 Identity service contract) — test_publish_user_created_emits_expected_identity_event
+
 ## Cross-Team XSD Compatibility
 
 These tests verify that when Team A sends a message and Team B receives it,
@@ -178,7 +187,6 @@ the XML validates against **both** teams' XSD schemas.
 The following integration points are documented in the flows but don't have
 XSD schemas from both sides yet, so we can't test them:
 
-- `identity_request / identity_response` — RPC (Identity Service)
 - `wallet_lease_request` / `wallet_lease_return` — Kassa ↔ CRM
 - `session_registration_confirmed` — CRM → Planning
 - `refund_processed` — Kassa → CRM

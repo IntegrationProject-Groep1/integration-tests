@@ -7,6 +7,8 @@
 
 This directory contains **non-blocking CI tests** that verify whether the XML messages produced by one team can be validated against the XSD schemas defined by the receiving team.
 
+It also includes **source-level contract checks** for the Identity Service so we can verify the real XML payloads that the repository creates, not just the example files.
+
 - ✅ **Non-blocking**: These tests **never prevent merges**. You can always merge your code.
 - 📊 **Informational**: Check the GitHub Actions summary to see what's working and what's not.
 - 🔄 **Automatic**: Runs on every push and every PR.
@@ -30,10 +32,11 @@ This directory contains **non-blocking CI tests** that verify whether the XML me
 
 ```
 integration-tests/
-├── conftest.py              # Shared utilities (XSD loading, validation)
-├── test_contracts.py        # All integration contract tests
-├── generate_report.py       # Generates the Markdown readiness report
-├── README.md                # This file
+├── conftest.py                    # Shared utilities (XSD loading, validation)
+├── test_contracts.py              # Main integration contract tests
+├── test_identity_service_contracts.py # Identity Service source/XML contract checks
+├── generate_report.py             # Generates the Markdown readiness report
+├── README.md                     # This file
 └── fixtures/
     ├── frontend/            # XML messages produced by Frontend
     │   ├── new_registration.xml
@@ -68,10 +71,11 @@ integration-tests/
 ```bash
 # Install dependencies
 pip install lxml pytest
+pip install -r ../identity-service/requirements.txt
 
 # Run the tests
 cd integration-tests
-python -m pytest test_contracts.py -v
+python -m pytest -v
 
 # Generate the readiness report
 python generate_report.py
@@ -96,8 +100,9 @@ python generate_report.py
 
 1. Add the XSD to your team directory
 2. Create a fixture XML in `fixtures/<sender-team>/`
-3. Add a test class in `test_contracts.py` following the existing pattern
-4. Add the class to `TEAM_MAP` in `generate_report.py`
+3. Add a test class in `test_contracts.py` following the existing pattern, or add a dedicated source-contract test file when the repo itself must be executed
+4. If the repository needs source-level verification, add a dedicated test file that imports the repo code
+5. Add the class to `TEAM_MAP` in `generate_report.py`
 
 ## Viewing Results
 
