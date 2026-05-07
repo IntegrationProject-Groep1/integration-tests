@@ -13,26 +13,69 @@ import json
 import re
 from pathlib import Path
 from datetime import datetime, timezone
+import xml.etree.ElementTree as ET
 
 
 def run_tests():
     """Run pytest with JSON output and capture results."""
-    result = subprocess.run(
-        [sys.executable, "-m", "pytest", "-v", "--tb=line", "--no-header"],
-        capture_output=True,
-        text=True,
-        cwd=Path(__file__).parent,
-    )
-    return result.stdout, result.stderr, result.returncode
+    junit_path = Path(__file__).parent / "pytest_junit.xml"
+    # Remove existing file if any
+    try:
+        if junit_path.exists():
+            junit_path.unlink()
+    except Exception:
+        pass
+
+    cmd = [
+        sys.executable,
+        "-m",
+        "pytest",
+        "-v",
+        "--tb=line",
+        "--no-header",
+        "--junitxml",
+        str(junit_path),
+    ]
+
+    result = subprocess.run(cmd, capture_output=True, text=True, cwd=Path(__file__).parent)
+    return result.stdout, result.stderr, result.returncode, junit_path
 
 
-def parse_results(stdout: str):
-    """Parse pytest verbose output into structured results."""
+def parse_results(stdout: str, junit_path: Path = None):
+    """Parse pytest results. Prefer JUnit XML if available, fallback to stdout parsing."""
     tests = []
     dod_tests = []
+
+    # If junit xml exists, parse it for reliable results
+    if junit_path and junit_path.exists():
+        try:
+            tree = ET.parse(str(junit_path))
+            root = tree.getroot()
+            # pytest junitxml uses <testcase> elements
+            for tc in root.findall('.//testcase'):
+                classname = tc.get('classname') or ''
+                name = tc.get('name') or ''
+                # Normalize to pytest-like identifier
+                identifier = f"{classname}::{name}" if classname else name
+
+                status = 'PASSED'
+                if tc.find('failure') is not None or tc.find('error') is not None:
+                    status = 'FAILED'
+                elif tc.find('skipped') is not None:
+                    status = 'SKIPPED'
+
+                if 'test_dod_checks' in (classname or '') or identifier.startswith('TestDoD_'):
+                    dod_tests.append({'name': identifier, 'status': status})
+                else:
+                    tests.append({'name': identifier, 'status': status})
+
+            return tests, dod_tests
+        except Exception:
+            # fallback to stdout parsing below
+            pass
+
+    # Fallback: parse verbose stdout
     for line in stdout.splitlines():
-        # Match lines like: test_contracts.py::TestClass::test_method PASSED
-        # Also handles potential path separators and newly added test files.
         match = re.search(r"(test_[^:]+\.py)::(\S+)\s+(PASSED|FAILED|ERROR|SKIPPED)", line)
         if match:
             file_type = match.group(1)
@@ -483,8 +526,8 @@ def generate_report(tests, dod_tests):
 
 
 def main():
-    stdout, stderr, returncode = run_tests()
-    tests, dod_tests = parse_results(stdout)
+    stdout, stderr, returncode, junit_path = run_tests()
+    tests, dod_tests = parse_results(stdout, junit_path)
 
     if not tests and not dod_tests:
         # Fallback: try to extract from stderr if stdout is empty
