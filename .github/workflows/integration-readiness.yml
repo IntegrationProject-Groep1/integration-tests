@@ -102,44 +102,12 @@ jobs:
       - name: Install dependencies
         run: pip install lxml pytest pytest-md
 
-      - name: Prepare TARGET_REPO (optional)
-        shell: bash
-        run: |
-          # Optional: repository_dispatch may include client_payload.target_repo to focus this run
-          TARGET="${{ github.event.client_payload.target_repo }}"
-          echo "TARGET_REPO=${TARGET}" >> $GITHUB_ENV || true
-          if [ -n "${TARGET}" ]; then
-            echo "Repository dispatch target requested: ${TARGET}"
-          fi
-
       - name: Run integration contract tests
-        shell: bash
         run: |
           # The workspace root now contains all the service folders as siblings to integration-tests
           export INTEGRATION_REPO_ROOT=$GITHUB_WORKSPACE
           cd integration-tests
-          if [ -n "$TARGET_REPO" ]; then
-            # Map common repo names to pytest -k filters so teams can run focused checks
-            KEYWORD="$TARGET_REPO"
-            KEYWORD_LOWER=$(echo "$KEYWORD" | tr '[:upper:]' '[:lower:]')
-            case "$KEYWORD_LOWER" in
-              *frontend*) KEYWORD="frontend" ;;
-              *kassa*) KEYWORD="kassa" ;;
-              *facturatie*|*facturation*|*invoice*) KEYWORD="facturatie" ;;
-              *planning*) KEYWORD="planning" ;;
-              *crm*) KEYWORD="crm" ;;
-              *monitoring*) KEYWORD="monitoring" ;;
-              *mailing*) KEYWORD="mailing" ;;
-              *heartbeat*) KEYWORD="heartbeat" ;;
-              *identity*) KEYWORD="identity" ;;
-              *) KEYWORD="$KEYWORD_LOWER" ;;
-            esac
-            echo "Running focused pytest -k '$KEYWORD'"
-            # Run but don't fail the job (non-blocking); results are saved to test-output.txt
-            python -m pytest -k "$KEYWORD" test_contracts.py test_dod_checks.py -v --tb=short --no-header 2>&1 | tee test-output.txt || true
-          else
-            python -m pytest test_contracts.py test_dod_checks.py -v --tb=short --no-header 2>&1 | tee test-output.txt
-          fi
+          python -m pytest test_contracts.py test_dod_checks.py -v --tb=short --no-header 2>&1 | tee test-output.txt
 
       - name: Generate readiness report
         if: always()
