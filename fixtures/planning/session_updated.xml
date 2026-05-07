@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Planning → Frontend: session_updated (Flow S·3) -->
+<message>
+  <header>
+    <message_id>plan-upd-001</message_id>
+    <timestamp>2026-05-07T09:30:00+02:00</timestamp>
+    <source>planning</source>
+    <type>session_updated</type>
+    <version>2.0</version>
+    <correlation_id>corr-sess-001</correlation_id>
+  </header>
+  <body>
+    <session_id>session-shift-keynote-2026</session_id>
+    <title>Opening Keynote — Shift Festival 2026</title>
+    <start_datetime>2026-05-13T10:30:00+02:00</start_datetime>
+    <end_datetime>2026-05-13T11:30:00+02:00</end_datetime>
+    <location>Aula 6</location>
+    <session_type>keynote</session_type>
+    <status>delayed</status>
+    <max_attendees>200</max_attendees>
+    <current_attendees>42</current_attendees>
+  </body>
+</message>

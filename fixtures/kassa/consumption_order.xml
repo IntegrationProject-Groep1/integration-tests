@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Kassa → CRM: consumption_order (Flow K·2) -->
+<message>
+  <header>
+    <message_id>kassa-cons-001</message_id>
+    <type>consumption_order</type>
+    <source>kassa</source>
+    <timestamp>2026-05-07T12:30:00+02:00</timestamp>
+    <version>2.0</version>
+  </header>
+  <body>
+    <is_anonymous>false</is_anonymous>
+    <customer>
+      <id>SF-CONTACT-001</id>
+      <user_id>019681a0-1234-7abc-8def-0123456789ab</user_id>
+      <type>company</type>
+      <email>jan@bedrijf.be</email>
+      <address>
+        <street>Nijverheidskaai</street>
+        <number>170</number>
+        <postal_code>1070</postal_code>
+        <city>Anderlecht</city>
+        <country>BE</country>
+      </address>
+    </customer>
+    <items>
+      <item>
+        <id>ITEM-001</id>
+        <sku>BEER-JUPILER-33CL</sku>
+        <description>Jupiler 33cl</description>
+        <quantity>2</quantity>
+        <unit_price currency="eur">3.50</unit_price>
+        <vat_rate>21</vat_rate>
+        <total_amount currency="eur">7.00</total_amount>
+      </item>
+    </items>
+  </body>
+</message>

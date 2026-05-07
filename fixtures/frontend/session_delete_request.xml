@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Frontend → Planning: session_delete_request (Flow S·4) -->
+<message>
+  <header>
+    <message_id>fe-sdel-001</message_id>
+    <timestamp>2026-05-07T09:00:00+02:00</timestamp>
+    <source>frontend</source>
+    <type>session_delete_request</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <session_id>session-shift-keynote-2026</session_id>
+    <reason>Spreker geannuleerd</reason>
+  </body>
+</message>

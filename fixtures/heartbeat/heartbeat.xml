@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Sidecar → Monitoring: heartbeat (Flow O·1) -->
+<message>
+  <header>
+    <message_id>a1b2c3d4-5678-9abc-def0-123456789abc</message_id>
+    <timestamp>2026-05-07T10:00:01+02:00</timestamp>
+    <source>frontend</source>
+    <type>heartbeat</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <status>online</status>
+    <uptime>86400</uptime>
+  </body>
+</message>

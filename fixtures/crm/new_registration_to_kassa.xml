@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- CRM → Kassa: new_registration forwarded (Flow R·1 step 2) -->
+<message>
+  <header>
+    <message_id>a1b2c3d4-5678-9abc-def0-123456789abc</message_id>
+    <type>new_registration</type>
+    <source>crm</source>
+    <timestamp>2026-05-07T10:00:05+02:00</timestamp>
+    <version>2.0</version>
+  </header>
+  <body>
+    <customer>
+      <user_id>019681a0-1234-7abc-8def-0123456789ab</user_id>
+      <email>jan.janssens@example.com</email>
+      <date_of_birth>1995-03-15</date_of_birth>
+      <contact>
+        <first_name>Jan</first_name>
+        <last_name>Janssens</last_name>
+      </contact>
+      <type>private</type>
+      <session_id>session-shift-keynote-2026</session_id>
+    </customer>
+    <payment_due>
+      <amount currency="eur">25.00</amount>
+      <status>unpaid</status>
+    </payment_due>
+  </body>
+</message>

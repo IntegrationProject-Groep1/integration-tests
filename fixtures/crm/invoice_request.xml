@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- CRM → Facturatie: invoice_request (Flow F·1) -->
+<message>
+  <header>
+    <message_id>inv-req-001</message_id>
+    <type>invoice_request</type>
+    <source>crm</source>
+    <timestamp>2026-05-07T14:00:00+02:00</timestamp>
+    <version>2.0</version>
+    <correlation_id>cons-ord-001</correlation_id>
+  </header>
+  <body>
+    <user_id>019681a0-1234-7abc-8def-0123456789ab</user_id>
+    <invoice_data>
+      <first_name>Jan</first_name>
+      <last_name>Janssens</last_name>
+      <email>jan@bedrijf.be</email>
+      <address>
+        <street>Nijverheidskaai</street>
+        <number>170</number>
+        <postal_code>1070</postal_code>
+        <city>Anderlecht</city>
+        <country>BE</country>
+      </address>
+      <company_name>Bedrijf NV</company_name>
+      <vat_number>BE0123456789</vat_number>
+    </invoice_data>
+  </body>
+</message>

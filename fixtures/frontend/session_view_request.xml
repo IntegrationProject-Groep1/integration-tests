@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Frontend → Planning: session_view_request (Flow S·2) -->
+<message>
+  <header>
+    <message_id>fe-sview-001</message_id>
+    <timestamp>2026-05-07T08:30:00+02:00</timestamp>
+    <source>frontend</source>
+    <type>session_view_request</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <session_id>session-shift-keynote-2026</session_id>
+  </body>
+</message>

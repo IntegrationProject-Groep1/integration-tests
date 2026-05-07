@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<event_ended>
+    <header>
+        <message_id>123e4567-e89b-12d3-a456-426614174000</message_id>
+        <source>Frontend</source>
+        <type>event_ended</type>
+        <version>2.0</version>
+        <timestamp>2026-05-07T12:00:00Z</timestamp>
+    </header>
+    <body>
+        <event_id>evt-2026</event_id>
+
+    </body>
+</event_ended>

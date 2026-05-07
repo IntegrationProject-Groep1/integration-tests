@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cancel_registration>
+    <header>
+        <message_id>123e4567-e89b-12d3-a456-426614174000</message_id>
+        <source>Frontend</source>
+        <type>cancel_registration</type>
+        <version>2.0</version>
+        <timestamp>2026-05-07T12:00:00Z</timestamp>
+    </header>
+    <body>
+        <session_id>sess-1</session_id>
+        <master_uuid>user-123</master_uuid>
+
+    </body>
+</cancel_registration>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Planning → Frontend: calendar_invite_confirmed (Flow N·1) -->
+<message>
+  <header>
+    <message_id>plan-calinv-conf-001</message_id>
+    <timestamp>2026-05-07T10:05:10+02:00</timestamp>
+    <source>planning</source>
+    <type>calendar_invite_confirmed</type>
+    <version>2.0</version>
+    <correlation_id>fe-calinv-001</correlation_id>
+  </header>
+  <body>
+    <session_id>session-shift-keynote-2026</session_id>
+    <original_message_id>fe-calinv-001</original_message_id>
+    <status>confirmed</status>
+    <ics_url>https://outlook.office365.com/owa/calendar/event/abc123</ics_url>
+  </body>
+</message>

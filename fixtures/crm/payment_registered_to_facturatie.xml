@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- CRM → Facturatie: payment_registered passthrough (Flow K·1) -->
+<message>
+  <header>
+    <message_id>pay-reg-001</message_id>
+    <version>2.0</version>
+    <type>payment_registered</type>
+    <timestamp>2026-05-07T11:00:00+02:00</timestamp>
+    <source>crm</source>
+    <correlation_id>corr-pay-001</correlation_id>
+  </header>
+  <body>
+    <payment_context>registration</payment_context>
+    <user_id>019681a0-1234-7abc-8def-0123456789ab</user_id>
+    <invoice>
+      <id>INV-2026-0042</id>
+      <status>paid</status>
+      <amount_paid currency="eur">25.00</amount_paid>
+      <due_date>2026-05-15</due_date>
+    </invoice>
+    <transaction>
+      <id>TXN-POS-00123</id>
+      <payment_method>on_site</payment_method>
+    </transaction>
+  </body>
+</message>
