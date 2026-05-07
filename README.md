@@ -81,6 +81,47 @@ python -m pytest -v
 python generate_report.py
 ```
 
+## Understanding the Readiness Report
+
+Every push runs the tests and generates a **readiness report** showing which integrations are working and which still need work.
+
+### Overall Status
+- **Passed**: ✅ Integration test passed — both teams' XSDs agree
+- **Failed**: ❌ Integration test failed — message doesn't validate or XSD issue
+- **Skipped**: ⏭️ XSD file not found — team hasn't created that schema yet
+
+### Per-Team Status Table
+
+Each team gets a status badge based on their integration contracts:
+
+| Status | Meaning | Action |
+|--------|---------|--------|
+| 🟢 **Ready** | All tests passing, 100% | No action needed, keep it up! |
+| 🟡 **Partial** | Most tests passing, <100% | Some XSDs missing or 1-2 failures — team needs to create XSDs |
+| 🔴 **Needs work** | Failures or many skipped | Team needs to fix failing tests or create XSD files |
+
+**Progress column**: Shows percentage of tests that passed or were skipped (not counting failures).
+
+### What Each Team Needs to Do
+
+**Teams marked 🔴 Needs work:**
+- Check the "Detailed Results per Team" section
+- For **skipped** tests: Create the missing XSD file in your team directory
+- For **failed** tests: Fix the XSD or the XML fixture to match your receiver
+
+**Teams marked 🟡 Partial:**
+- Review which tests are skipped (missing XSDs)
+- Work with sender/receiver teams to align schemas
+- Each team that owns an XSD must maintain it
+
+**Teams marked 🟢 Ready:**
+- Keep your XSDs maintained and updated
+- If other teams change their message format, you may need to update your XSD
+
+### Definition of Done (DoD) Checks
+
+The report also includes DoD checks for each team (like "Docker Compose exists", "DLQ configured", etc.). These verify project readiness beyond just XSD validation.
+
 ## How to Add Tests for Your Team
 
 ### If you're a **sender** (your team produces XML):
