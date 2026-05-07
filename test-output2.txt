@@ -1,0 +1,15 @@
+C:\Users\Dario\AppData\Roaming\Python\Python314\site-packages\langsmith\schemas.py:22: UserWarning: Core Pydantic V1 functionality isn't compatible with Python 3.14 or greater.
+  from pydantic.v1 import (
+C:\Users\Dario\AppData\Roaming\Python\Python314\site-packages\pytest_asyncio\plugin.py:247: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.............................................................s....       [100%]
+============================== warnings summary ===============================
+test_e2e_flows.py:18
+  C:\Users\Dario\OneDrive - Erasmushogeschool Brussel\Erasmus Hogeschool\2025-2026\Integration Project\Repo-IntegrationProject\integration-tests\test_e2e_flows.py:18: PytestUnknownMarkWarning: Unknown pytest.mark.e2e - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.e2e
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\Dario\OneDrive - Erasmushogeschool Brussel\Erasmus Hogeschool\2025-2026\Integration Project\Repo-IntegrationProject\integration-tests\pytest_junit.xml -
+65 passed, 1 skipped, 1 warning in 1.19s
