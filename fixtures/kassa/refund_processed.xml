@@ -1,0 +1,14 @@
+<message>
+  <header>
+    <message_id>a8b27c1d-4f2a-4b3e-9c5f-000000000100</message_id>
+    <timestamp>2026-05-08T12:00:00Z</timestamp>
+    <source>kassa</source>
+    <type>refund_processed</type>
+    <version>2.0</version>
+  </header>
+  <body>
+    <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-000000000001</identity_uuid>
+    <refund_amount currency="eur">5.50</refund_amount>
+    <reason>Customer requested refund for unused token</reason>
+  </body>
+</message>

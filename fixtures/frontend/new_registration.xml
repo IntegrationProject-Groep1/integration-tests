@@ -7,7 +7,7 @@
     <source>frontend</source>
     <type>new_registration</type>
     <version>2.0</version>
-    <correlation_id>corr-reg-001</correlation_id>
+    <correlation_id>550e8400-e29b-41d4-a716-446655440001</correlation_id>
   </header>
   <body>
     <customer>
@@ -21,7 +21,7 @@
         <last_name>Janssens</last_name>
       </contact>
       <address>Nijverheidskaai 170, 1070 Anderlecht</address>
-      <session_id>session-shift-keynote-2026</session_id>
+      <session_id>87130566-b2db-4c6d-956e-4d17a831c949</session_id>
       <payment_due>
         <amount currency="eur">25.00</amount>
         <status>unpaid</status>

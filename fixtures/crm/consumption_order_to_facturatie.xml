@@ -2,17 +2,17 @@
 <!-- CRM → Facturatie: consumption_order passthrough (Flow K·2) -->
 <message>
   <header>
-    <message_id>cons-ord-001</message_id>
-    <type>consumption_order</type>
-    <source>crm</source>
+    <message_id>550e8400-e29b-41d4-a716-446655440013</message_id>
     <timestamp>2026-05-07T12:30:00+02:00</timestamp>
+    <source>crm</source>
+    <type>consumption_order</type>
     <version>2.0</version>
   </header>
   <body>
     <is_anonymous>false</is_anonymous>
     <customer>
       <id>SF-CONTACT-001</id>
-      <user_id>019681a0-1234-7abc-8def-0123456789ab</user_id>
+      <identity_uuid>019681a0-1234-7abc-8def-0123456789ab</identity_uuid>
       <type>company</type>
       <email>jan@bedrijf.be</email>
       <address>

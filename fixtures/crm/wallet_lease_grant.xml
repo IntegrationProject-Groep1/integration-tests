@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wallet_lease_grant>
     <header>
-        <message_id>123e4567-e89b-12d3-a456-426614174000</message_id>
-        <source>CRM</source>
-        <type>wallet_lease_grant</type>
-        <version>2.0</version>
-        <timestamp>2026-05-07T12:00:00Z</timestamp>
-    </header>
+    <message_id>123e4567-e89b-12d3-a456-426614174000</message_id>
+    <timestamp>2026-05-07T12:00:00Z</timestamp>
+    <source>CRM</source>
+    <type>wallet_lease_grant</type>
+    <version>2.0</version>
+  </header>
     <body>
         <balance>100.00</balance>
-        <lease_id>lease-1</lease_id>
+        <lease_id>0e37ffca-2824-4f25-891a-85d51f16282e</lease_id>
         <expires_at>2026-05-14T00:00:00Z</expires_at>
 
     </body>

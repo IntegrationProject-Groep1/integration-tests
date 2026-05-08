@@ -2,17 +2,17 @@
 <!-- Kassa → CRM: payment_registered (Flow K·1) -->
 <message>
   <header>
-    <message_id>kassa-pay-001</message_id>
-    <type>payment_registered</type>
-    <source>kassa</source>
+    <message_id>550e8400-e29b-41d4-a716-446655440011</message_id>
     <timestamp>2026-05-07T11:00:00+02:00</timestamp>
+    <source>kassa</source>
+    <type>payment_registered</type>
     <version>2.0</version>
-    <correlation_id>corr-pay-001</correlation_id>
+    <correlation_id>550e8400-e29b-41d4-a716-446655440003</correlation_id>
   </header>
   <body>
     <email>jan.janssens@example.com</email>
     <payment_context>registration</payment_context>
-    <user_id>019681a0-1234-7abc-8def-0123456789ab</user_id>
+    <identity_uuid>019681a0-1234-7abc-8def-0123456789ab</identity_uuid>
     <invoice>
       <id>INV-2026-0042</id>
       <status>paid</status>

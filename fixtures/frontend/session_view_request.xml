@@ -2,13 +2,13 @@
 <!-- Frontend → Planning: session_view_request (Flow S·2) -->
 <message>
   <header>
-    <message_id>fe-sview-001</message_id>
+    <message_id>dd385292-7f14-4f1d-b06b-2a14a63b46a9</message_id>
     <timestamp>2026-05-07T08:30:00+02:00</timestamp>
     <source>frontend</source>
     <type>session_view_request</type>
     <version>2.0</version>
   </header>
   <body>
-    <session_id>session-shift-keynote-2026</session_id>
+    <session_id>87130566-b2db-4c6d-956e-4d17a831c949</session_id>
   </body>
 </message>

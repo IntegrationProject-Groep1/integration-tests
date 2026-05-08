@@ -2,14 +2,14 @@
 <!-- Frontend → Planning: session_delete_request (Flow S·4) -->
 <message>
   <header>
-    <message_id>fe-sdel-001</message_id>
+    <message_id>a6733640-30b6-44a8-bc92-9b6f9ef164e3</message_id>
     <timestamp>2026-05-07T09:00:00+02:00</timestamp>
     <source>frontend</source>
     <type>session_delete_request</type>
     <version>2.0</version>
   </header>
   <body>
-    <session_id>session-shift-keynote-2026</session_id>
+    <session_id>87130566-b2db-4c6d-956e-4d17a831c949</session_id>
     <reason>Spreker geannuleerd</reason>
   </body>
 </message>

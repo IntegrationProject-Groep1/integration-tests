@@ -3,14 +3,14 @@
 <message>
   <header>
     <message_id>a1b2c3d4-5678-9abc-def0-123456789abc</message_id>
-    <type>new_registration</type>
-    <source>crm</source>
     <timestamp>2026-05-07T10:00:05+02:00</timestamp>
+    <source>crm</source>
+    <type>new_registration</type>
     <version>2.0</version>
   </header>
   <body>
     <customer>
-      <user_id>019681a0-1234-7abc-8def-0123456789ab</user_id>
+      <identity_uuid>019681a0-1234-7abc-8def-0123456789ab</identity_uuid>
       <email>jan.janssens@example.com</email>
       <date_of_birth>1995-03-15</date_of_birth>
       <contact>
@@ -18,7 +18,7 @@
         <last_name>Janssens</last_name>
       </contact>
       <type>private</type>
-      <session_id>session-shift-keynote-2026</session_id>
+      <session_id>87130566-b2db-4c6d-956e-4d17a831c949</session_id>
     </customer>
     <payment_due>
       <amount currency="eur">25.00</amount>

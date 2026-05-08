@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wallet_remote_topup>
     <header>
-        <message_id>123e4567-e89b-12d3-a456-426614174000</message_id>
-        <source>CRM</source>
-        <type>wallet_remote_topup</type>
-        <version>2.0</version>
-        <timestamp>2026-05-07T12:00:00Z</timestamp>
-    </header>
+    <message_id>123e4567-e89b-12d3-a456-426614174000</message_id>
+    <timestamp>2026-05-07T12:00:00Z</timestamp>
+    <source>CRM</source>
+    <type>wallet_remote_topup</type>
+    <version>2.0</version>
+  </header>
     <body>
-        <lease_id>lease-1</lease_id>
+        <lease_id>0e37ffca-2824-4f25-891a-85d51f16282e</lease_id>
         <added_amount>20.00</added_amount>
         <new_balance>120.00</new_balance>
 

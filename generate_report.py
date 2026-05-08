@@ -389,10 +389,59 @@ TEAM_MAP = {
         "flow": "XSD Compatibility",
         "message": "session_view_response",
     },
+    "TestK3_KassaToCRM_RefundProcessed": {
+        "sender": "Kassa",
+        "receiver": "CRM",
+        "flow": "K·3 Refund verwerkt",
+        "message": "refund_processed",
+    },
+    "TestK4_KassaToCRM_WalletLeaseRequest": {
+        "sender": "Kassa",
+        "receiver": "CRM",
+        "flow": "K·4 QR-scan inkom (request)",
+        "message": "wallet_lease_request",
+    },
+    "TestK6_KassaToCRM_WalletLeaseReturn": {
+        "sender": "Kassa",
+        "receiver": "CRM",
+        "flow": "K·6 Badges inleveren",
+        "message": "wallet_lease_return",
+    },
+    "TestN1_CRMToPlanning_SessionRegistrationConfirmed": {
+        "sender": "CRM",
+        "receiver": "Planning",
+        "flow": "N·1 Inschrijving bevestigen",
+        "message": "session_registration_confirmed",
+    },
 }
 
-# All teams
-ALL_TEAMS = ["Frontend", "CRM", "Kassa", "Facturatie", "Planning", "Mailing", "Monitoring", "Sidecar", "Identity Service"]
+# All teams (matches directory names)
+ALL_TEAMS = [
+    "IP-groep1-frontend", 
+    "CRM", 
+    "Kassa", 
+    "Facturatie", 
+    "Planning", 
+    "Mailing", 
+    "monitoring", 
+    "Infra",
+    "Sidecar",
+    "Identity Service"
+]
+
+# Display names for the report
+TEAM_DISPLAY_NAMES = {
+    "IP-groep1-frontend": "Frontend",
+    "monitoring": "Monitoring",
+    "CRM": "CRM",
+    "Kassa": "Kassa",
+    "Facturatie": "Facturatie",
+    "Planning": "Planning",
+    "Mailing": "Mailing",
+    "Infra": "Infra",
+    "Sidecar": "Sidecar",
+    "Identity Service": "Identity Service"
+}
 
 
 def classify_test(test_name: str):
@@ -402,7 +451,20 @@ def classify_test(test_name: str):
       'test_contracts.TestR1_FrontendToCRM_NewRegistration::test_method'
     To:
       'TestR1_FrontendToCRM_NewRegistration'
+      
+    Also handles parametrized global tests like:
+      'test_dod_checks.TestDoD_Global::test_dockerfile_exists[CRM]'
+    To:
+      'TestDoD_CRM'
     """
+    # Handle parametrization [TeamName]
+    match = re.search(r"\[([^\]]+)\]", test_name)
+    if match:
+        team_param = match.group(1)
+        # We only want to remap TestDoD_Global to TestDoD_TeamName
+        if "TestDoD_Global" in test_name:
+            return f"TestDoD_{team_param}"
+
     parts = test_name.split("::")
     classname_with_module = parts[0] if len(parts) >= 1 else test_name
     # Remove module prefix (everything before the last dot)
@@ -485,7 +547,8 @@ def generate_report(tests, dod_tests):
             team_name = info[team_key]
             # Handle cross-team names
             for team in ALL_TEAMS:
-                if team in team_name and team not in matched_teams:
+                display = TEAM_DISPLAY_NAMES.get(team, team)
+                if display in team_name and team not in matched_teams:
                     matched_teams.add(team)
                     team_stats[team]["total"] += 1
                     if test["status"] == "PASSED":
@@ -543,7 +606,8 @@ def generate_report(tests, dod_tests):
         if s["total"] == 0 and len(team_dods) == 0:
             continue
             
-        lines.append(f"### {team}")
+        display_name = TEAM_DISPLAY_NAMES.get(team, team)
+        lines.append(f"### {display_name}")
         lines.append("")
         
         if len(team_dods) > 0:
@@ -579,12 +643,13 @@ def generate_report(tests, dod_tests):
     # What's missing
     lines.append("## ⚠️ Not Yet Covered by These Tests")
     lines.append("")
-    lines.append("The following integration points are documented in the flows but don't have")
-    lines.append("XSD schemas from both sides yet, so we can't test them:")
+    lines.append("The following integration points are documented in the flows but are still in development")
+    lines.append("or missing specific XSD schemas:")
     lines.append("")
-    lines.append("- `wallet_lease_request` / `wallet_lease_return` — Kassa ↔ CRM")
-    lines.append("- `session_registration_confirmed` — CRM → Planning")
-    lines.append("- `refund_processed` — Kassa → CRM")
+    lines.append("- `user_checkin` — Kassa → CRM")
+    lines.append("- `wallet_topup_request` — Frontend → CRM")
+    lines.append("- `invoice_created_notification` — Facturatie → CRM")
+    lines.append("- `mailing_status` — Mailing → CRM")
     lines.append("")
     lines.append("**Teams**: Add your XSD files to your team directory and create matching")
     lines.append("fixture XML files in `integration-tests/fixtures/<team>/` to enable testing.")

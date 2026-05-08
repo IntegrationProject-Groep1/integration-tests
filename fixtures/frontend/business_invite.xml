@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <business_invite>
     <header>
-        <message_id>123e4567-e89b-12d3-a456-426614174000</message_id>
-        <source>Frontend</source>
-        <type>business_invite</type>
-        <version>2.0</version>
-        <timestamp>2026-05-07T12:00:00Z</timestamp>
-    </header>
+    <message_id>123e4567-e89b-12d3-a456-426614174000</message_id>
+    <timestamp>2026-05-07T12:00:00Z</timestamp>
+    <source>Frontend</source>
+    <type>business_invite</type>
+    <version>2.0</version>
+  </header>
     <body>
-        <inviter_uuid>user-1</inviter_uuid>
-        <business_id>bus-1</business_id>
+        <inviter_uuid>1cdd0702-e53f-4fe6-9507-b6f6e7dfd537</inviter_uuid>
+        <business_id>02a7a5ef-4de4-42ff-bcee-88bface31dd0</business_id>
         <invited_email>test@test.com</invited_email>
 
     </body>

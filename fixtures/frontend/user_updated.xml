@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <user_updated>
     <header>
-        <message_id>123e4567-e89b-12d3-a456-426614174000</message_id>
-        <source>Frontend</source>
-        <type>user_updated</type>
-        <version>2.0</version>
-        <timestamp>2026-05-07T12:00:00Z</timestamp>
-    </header>
+    <message_id>123e4567-e89b-12d3-a456-426614174000</message_id>
+    <timestamp>2026-05-07T12:00:00Z</timestamp>
+    <source>Frontend</source>
+    <type>user_updated</type>
+    <version>2.0</version>
+  </header>
     <body>
-        <master_uuid>user-123</master_uuid>
+        <master_uuid>12c63b99-784a-422c-8dc0-d95205ace79e</master_uuid>
         <type>private</type>
 
     </body>

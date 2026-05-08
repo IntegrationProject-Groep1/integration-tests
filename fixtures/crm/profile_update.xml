@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <profile_update>
     <header>
-        <message_id>123e4567-e89b-12d3-a456-426614174000</message_id>
-        <source>CRM</source>
-        <type>profile_update</type>
-        <version>2.0</version>
-        <timestamp>2026-05-07T12:00:00Z</timestamp>
-    </header>
+    <message_id>123e4567-e89b-12d3-a456-426614174000</message_id>
+    <timestamp>2026-05-07T12:00:00Z</timestamp>
+    <source>CRM</source>
+    <type>profile_update</type>
+    <version>2.0</version>
+  </header>
     <body>
-        <master_uuid>user-1</master_uuid>
+        <master_uuid>1cdd0702-e53f-4fe6-9507-b6f6e7dfd537</master_uuid>
         <type>company</type>
 
     </body>

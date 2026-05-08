@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <session_occupancy_update>
     <header>
-        <message_id>123e4567-e89b-12d3-a456-426614174000</message_id>
-        <source>Planning</source>
-        <type>session_occupancy_update</type>
-        <version>2.0</version>
-        <timestamp>2026-05-07T12:00:00Z</timestamp>
-    </header>
+    <message_id>123e4567-e89b-12d3-a456-426614174000</message_id>
+    <timestamp>2026-05-07T12:00:00Z</timestamp>
+    <source>Planning</source>
+    <type>session_occupancy_update</type>
+    <version>2.0</version>
+  </header>
     <body>
-        <session_id>sess-1</session_id>
+        <session_id>d481b8d0-3a4b-435b-b784-f53df71402c2</session_id>
         <current_attendees>10</current_attendees>
         <max_capacity>50</max_capacity>
 

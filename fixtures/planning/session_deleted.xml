@@ -2,15 +2,15 @@
 <!-- Planning → Frontend: session_deleted (Flow S·4) -->
 <message>
   <header>
-    <message_id>plan-del-001</message_id>
+    <message_id>550e8400-e29b-41d4-a716-446655440008</message_id>
     <timestamp>2026-05-07T09:45:00+02:00</timestamp>
     <source>planning</source>
     <type>session_deleted</type>
     <version>2.0</version>
-    <correlation_id>corr-sess-001</correlation_id>
+    <correlation_id>550e8400-e29b-41d4-a716-446655440002</correlation_id>
   </header>
   <body>
-    <session_id>session-shift-keynote-2026</session_id>
+    <session_id>87130566-b2db-4c6d-956e-4d17a831c949</session_id>
     <reason>Spreker geannuleerd</reason>
     <deleted_by>admin@desideriushogeschool.be</deleted_by>
   </body>

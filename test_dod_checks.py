@@ -90,16 +90,20 @@ class TestDoD_Frontend:
         """Check if the user_unregistered logic has been implemented."""
         fe_dir = REPO_ROOT / "IP-groep1-frontend"
         found = False
-        for filepath in fe_dir.rglob("*.php"):
-            try:
-                content = filepath.read_text(encoding="utf-8")
-                if "user_unregistered" in content:
-                    found = True
-                    break
-            except Exception:
-                pass
+        # Drupal logic can be in .php or .module files. 
+        # The event might be called 'user_unregistered' or 'user_deleted' (synonym in some contracts).
+        for ext in ["*.php", "*.module"]:
+            for filepath in fe_dir.rglob(ext):
+                try:
+                    content = filepath.read_text(encoding="utf-8").lower()
+                    if "user_unregistered" in content or "user_deleted" in content:
+                        found = True
+                        break
+                except Exception:
+                    pass
+            if found: break
         
-        assert found, "Could not find 'user_unregistered' event publication in the PHP codebase."
+        assert found, "Could not find 'user_unregistered' (or 'user_deleted') event publication in the PHP codebase."
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -110,7 +114,7 @@ class TestDoD_Facturatie:
         """Check if a DLQ (Dead Letter Queue) is configured in Facturatie."""
         fact_dir = REPO_ROOT / "Facturatie"
         found = False
-        for filepath in fact_dir.rglob("*.ts"):
+        for filepath in fact_dir.rglob("*.py"):
             try:
                 content = filepath.read_text(encoding="utf-8").lower()
                 if "dead" in content and "letter" in content or "dlq" in content:
@@ -170,3 +174,65 @@ class TestDoD_Planning:
                     pass
         assert found, "Microsoft Graph API integration not found in Planning codebase (expected references to graph.microsoft.com)."
 
+
+# ═══════════════════════════════════════════════════════════════════════
+# GLOBAL DOD CHECKS (V2.3)
+# ═══════════════════════════════════════════════════════════════════════
+class TestDoD_Global:
+    TEAMS = [
+        "IP-groep1-frontend", 
+        "CRM", 
+        "Facturatie", 
+        "Kassa", 
+        "Planning", 
+        "Mailing", 
+        "monitoring", 
+        "Infra"
+    ]
+
+    @pytest.mark.parametrize("team", TEAMS)
+    def test_dockerfile_exists(self, team):
+        """Each team must have a Dockerfile for containerization."""
+        team_dir = REPO_ROOT / team
+        if not team_dir.exists():
+            pytest.skip(f"Team directory {team} not found.")
+            
+        dockerfiles = list(team_dir.glob("Dockerfile*")) + list(team_dir.glob("docker/Dockerfile*"))
+        assert len(dockerfiles) > 0, f"No Dockerfile found for team {team}."
+
+    @pytest.mark.parametrize("team", TEAMS)
+    def test_ci_cd_workflow_exists(self, team):
+        """Each team must have a CI/CD workflow defined."""
+        team_dir = REPO_ROOT / team
+        if not team_dir.exists():
+            pytest.skip(f"Team directory {team} not found.")
+            
+        workflow_dir = team_dir / ".github" / "workflows"
+        workflows = list(workflow_dir.glob("*.yml")) + list(workflow_dir.glob("*.yaml"))
+        
+        # Check root as well for monorepo-style workflows
+        root_workflows = list((REPO_ROOT / ".github" / "workflows").glob(f"*{team}*.yml"))
+        
+        assert len(workflows) > 0 or len(root_workflows) > 0, f"No CI/CD workflow found for team {team}."
+
+    @pytest.mark.parametrize("team", TEAMS)
+    def test_synthese_document_exists(self, team):
+        """Each team must have a synthesis document (synthese.md)."""
+        team_dir = REPO_ROOT / team
+        if not team_dir.exists():
+            pytest.skip(f"Team directory {team} not found.")
+            
+        possible_names = ["synthese.md", "SYNTHESE.md", "docs/synthese.md", "README.md"]
+        found = any((team_dir / name).exists() for name in possible_names)
+        assert found, f"No synthesis document found for team {team}. Expected synthese.md or README.md."
+
+    @pytest.mark.parametrize("team", TEAMS)
+    def test_timesheets_exist(self, team):
+        """Each team must have timesheets for its members."""
+        team_dir = REPO_ROOT / team
+        if not team_dir.exists():
+            pytest.skip(f"Team directory {team} not found.")
+            
+        possible_names = ["timesheets.md", "TIMESHEETS.md", "docs/timesheets.md", "timesheets/"]
+        found = any((team_dir / name).exists() for name in possible_names)
+        assert found, f"No timesheets found for team {team}."

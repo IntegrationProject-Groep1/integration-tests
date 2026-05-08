@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <vat_validation_error>
     <header>
-        <message_id>123e4567-e89b-12d3-a456-426614174000</message_id>
-        <source>CRM</source>
-        <type>vat_validation_error</type>
-        <version>2.0</version>
-        <timestamp>2026-05-07T12:00:00Z</timestamp>
-    </header>
+    <message_id>550e8400-e29b-41d4-a716-446655440018</message_id>
+    <timestamp>2026-05-07T12:00:00Z</timestamp>
+    <source>CRM</source>
+    <type>vat_validation_error</type>
+    <version>2.0</version>
+  </header>
     <body>
+        <identity_uuid>019681a0-1234-7abc-8def-0123456789ab</identity_uuid>
         <vat_number>BE12345678</vat_number>
-        <reason>Invalid checksum</reason>
+        <error_message>Invalid checksum</error_message>
 
     </body>
 </vat_validation_error>

@@ -591,3 +591,54 @@ class TestContractRejections:
         )
         valid, err = validate_xml_against_xsd(xml, KASSA_XSD / "schema_consumption_order_v2.3.xsd")
         assert not valid, "Kassa XSD allowed missing currency attribute on monetary field"
+
+# ═══════════════════════════════════════════════════════════════════════
+# ADDITIONAL V2.3 FLOWS (Gap Analysis)
+# ═══════════════════════════════════════════════════════════════════════
+
+class TestK3_KassaToCRM_RefundProcessed:
+    """
+    Flow K·3: Kassa sends refund_processed to CRM.
+    """
+    def test_kassa_refund_processed_validates_against_kassa_xsd(self):
+        xml = (FIXTURES / "kassa" / "refund_processed.xml").read_text()
+        # Note: Kassa XSD has a known bug in UUID pattern in some versions
+        valid, err = validate_xml_against_xsd(xml, KASSA_XSD / "schema_refund_processed.xsd")
+        assert valid, f"Kassa refund_processed fails own XSD:\n{err}"
+
+class TestK4_KassaToCRM_WalletLeaseRequest:
+    """
+    Flow K·4: Kassa sends wallet_lease_request to CRM.
+    """
+    def test_kassa_wallet_lease_request_exists(self):
+        # We don't have a specific XSD for request yet, usually uses lease_grant schema or generic error
+        # For now we check if it validates against a generic message structure if available
+        xml = (FIXTURES / "kassa" / "wallet_lease_request.xml").read_text()
+        # Placeholder for real XSD if team adds it
+        xsd = KASSA_XSD / "schema_wallet_lease_request.xsd"
+        if not xsd.exists():
+            pytest.skip("Missing schema_wallet_lease_request.xsd")
+        valid, err = validate_xml_against_xsd(xml, xsd)
+        assert valid, err
+
+class TestK6_KassaToCRM_WalletLeaseReturn:
+    """
+    Flow K·6: Kassa sends wallet_lease_return to CRM.
+    """
+    def test_kassa_wallet_lease_return_exists(self):
+        xml = (FIXTURES / "kassa" / "wallet_lease_return.xml").read_text()
+        xsd = KASSA_XSD / "schema_wallet_lease_return.xsd"
+        if not xsd.exists():
+            pytest.skip("Missing schema_wallet_lease_return.xsd")
+        valid, err = validate_xml_against_xsd(xml, xsd)
+        assert valid, err
+
+class TestN1_CRMToPlanning_SessionRegistrationConfirmed:
+    """
+    Flow N·1: CRM sends session_registration_confirmed to Planning.
+    """
+    def test_crm_session_registration_confirmed_exists(self):
+        xml = (FIXTURES / "crm" / "session_registration_confirmed.xml").read_text()
+        # This often uses calendar_invite_confirmed schema
+        valid, err = validate_xml_against_xsd(xml, PLANNING_XSD / "calendar_invite_confirmed.xsd")
+        assert valid, f"CRM session_registration_confirmed fails Planning XSD:\n{err}"

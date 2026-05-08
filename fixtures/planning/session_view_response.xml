@@ -2,27 +2,27 @@
 <!-- Planning → Frontend: session_view_response (Flow S·2) -->
 <message>
   <header>
-    <message_id>plan-sview-resp-001</message_id>
+    <message_id>550e8400-e29b-41d4-a716-446655440006</message_id>
     <timestamp>2026-05-07T08:30:05+02:00</timestamp>
     <source>planning</source>
     <type>session_view_response</type>
     <version>2.0</version>
-    <correlation_id>fe-sview-001</correlation_id>
+    <correlation_id>550e8400-e29b-41d4-a716-446655440005</correlation_id>
   </header>
   <body>
-    <request_message_id>fe-sview-001</request_message_id>
+    <request_message_id>550e8400-e29b-41d4-a716-446655440005</request_message_id>
     <requested_session_id>session-shift-keynote-2026</requested_session_id>
     <status>ok</status>
     <session_count>1</session_count>
     <sessions>
       <session>
-        <session_id>session-shift-keynote-2026</session_id>
+        <session_id>87130566-b2db-4c6d-956e-4d17a831c949</session_id>
         <title>Opening Keynote — Shift Festival 2026</title>
         <start_datetime>2026-05-13T10:00:00+02:00</start_datetime>
         <end_datetime>2026-05-13T11:00:00+02:00</end_datetime>
         <location>Aula 6</location>
         <session_type>keynote</session_type>
-        <status>scheduled</status>
+        <status>draft</status>
         <max_attendees>200</max_attendees>
         <current_attendees>42</current_attendees>
       </session>

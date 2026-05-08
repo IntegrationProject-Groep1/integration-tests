@@ -2,15 +2,15 @@
 <!-- Facturatie → CRM: invoice_status (Flow F·1) -->
 <message>
   <header>
-    <message_id>fac-status-001</message_id>
+    <message_id>550e8400-e29b-41d4-a716-446655440016</message_id>
     <timestamp>2026-05-07T14:30:00+02:00</timestamp>
     <source>facturatie</source>
     <type>invoice_status</type>
     <version>2.0</version>
   </header>
   <body>
-    <invoice_id>INV-2026-0042</invoice_id>
-    <customer_id>019681a0-1234-7abc-8def-0123456789ab</customer_id>
+    <invoice_id>972ddc6a-c371-4528-83c5-eab3b78359f7</invoice_id>
+    <identity_uuid>019681a0-1234-7abc-8def-0123456789ab</identity_uuid>
     <status>sent</status>
     <amount currency="eur">7.00</amount>
     <due_date>2026-05-21</due_date>

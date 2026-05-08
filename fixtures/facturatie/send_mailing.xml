@@ -2,12 +2,12 @@
 <!-- Facturatie → Mailing: send_mailing with invoice PDF (Flow F·1) -->
 <message>
   <header>
-    <message_id>fac-mail-001</message_id>
+    <message_id>550e8400-e29b-41d4-a716-446655440017</message_id>
     <timestamp>2026-05-07T14:35:00+02:00</timestamp>
     <source>facturatie</source>
     <type>send_mailing</type>
     <version>2.0</version>
-    <correlation_id>inv-req-001</correlation_id>
+    <correlation_id>550e8400-e29b-41d4-a716-446655440014</correlation_id>
   </header>
   <body>
     <campaign_id>invoice-delivery-2026-05</campaign_id>
@@ -17,7 +17,7 @@
     <recipients>
       <recipient>
         <email>jan@bedrijf.be</email>
-        <customer_id>019681a0-1234-7abc-8def-0123456789ab</customer_id>
+        <identity_uuid>019681a0-1234-7abc-8def-0123456789ab</identity_uuid>
         <contact>
           <first_name>Jan</first_name>
           <last_name>Janssens</last_name>

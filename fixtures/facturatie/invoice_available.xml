@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <invoice_available>
     <header>
-        <message_id>123e4567-e89b-12d3-a456-426614174000</message_id>
-        <source>Facturatie</source>
-        <type>invoice_available</type>
-        <version>2.0</version>
-        <timestamp>2026-05-07T12:00:00Z</timestamp>
-    </header>
+    <message_id>123e4567-e89b-12d3-a456-426614174000</message_id>
+    <timestamp>2026-05-07T12:00:00Z</timestamp>
+    <source>Facturatie</source>
+    <type>invoice_available</type>
+    <version>2.0</version>
+  </header>
     <body>
-        <invoice_id>INV-001</invoice_id>
+        <invoice_id>da0b00f0-8a9d-414e-a53a-bca36323c9c6</invoice_id>
         <download_url>https://facturatie.internal/INV-001.pdf</download_url>
 
     </body>
