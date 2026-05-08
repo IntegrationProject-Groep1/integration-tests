@@ -396,11 +396,20 @@ ALL_TEAMS = ["Frontend", "CRM", "Kassa", "Facturatie", "Planning", "Mailing", "M
 
 
 def classify_test(test_name: str):
-    """Extract class name from pytest test identifier."""
+    """Extract class name from pytest test identifier.
+    
+    Converts pytest JUnit identifiers like:
+      'test_contracts.TestR1_FrontendToCRM_NewRegistration::test_method'
+    To:
+      'TestR1_FrontendToCRM_NewRegistration'
+    """
     parts = test_name.split("::")
-    if len(parts) >= 1:
-        return parts[0]
-    return test_name
+    classname_with_module = parts[0] if len(parts) >= 1 else test_name
+    # Remove module prefix (everything before the last dot)
+    if "." in classname_with_module:
+        result = classname_with_module.split(".")[-1]
+        return result
+    return classname_with_module
 
 
 def generate_report(tests, dod_tests):
@@ -412,6 +421,15 @@ def generate_report(tests, dod_tests):
     passed = sum(1 for t in tests if t["status"] == "PASSED") + sum(1 for t in dod_tests if t["status"] == "PASSED")
     failed = sum(1 for t in tests if t["status"] == "FAILED") + sum(1 for t in dod_tests if t["status"] == "FAILED")
     skipped = sum(1 for t in tests if t["status"] == "SKIPPED") + sum(1 for t in dod_tests if t["status"] == "SKIPPED")
+    
+    # Debug: Show test classification
+    import sys
+    print(f"DEBUG: Total tests={total}, passed={passed}, failed={failed}, skipped={skipped}", file=sys.stderr)
+    print(f"DEBUG: Contract tests count={len(tests)}, DoD tests count={len(dod_tests)}", file=sys.stderr)
+    if tests:
+        sample_test = tests[0]
+        class_name = classify_test(sample_test['name'])
+        print(f"DEBUG: Sample test name='{sample_test['name']}' → classified='{class_name}' → in TEAM_MAP={class_name in TEAM_MAP}", file=sys.stderr)
 
     lines = []
     lines.append("# 🔗 Integration Readiness Report")
@@ -452,10 +470,12 @@ def generate_report(tests, dod_tests):
     for team in ALL_TEAMS:
         team_stats[team] = {"pass": 0, "fail": 0, "skip": 0, "total": 0, "details": []}
 
+    unmatched_tests = []
     for test in tests:
         class_name = classify_test(test["name"])
         info = TEAM_MAP.get(class_name, None)
         if not info:
+            unmatched_tests.append(class_name)
             continue
 
         status_icon = {"PASSED": "✅", "FAILED": "❌", "SKIPPED": "⏭️", "ERROR": "💥"}.get(test["status"], "❓")
@@ -479,6 +499,16 @@ def generate_report(tests, dod_tests):
                     team_stats[team]["details"].append(
                         f"  {status_icon} `{info['message']}` ({info['flow']}) — {method_name}"
                     )
+    
+    # Debug: Show unmatched tests
+    if unmatched_tests:
+        import sys
+        print(f"DEBUG: Unmatched test classes (not in TEAM_MAP): {unmatched_tests[:5]}", file=sys.stderr)
+    for team, s in team_stats.items():
+        if s["total"] == 0:
+            import sys
+            print(f"DEBUG: Team '{team}' has 0 tests in team_stats", file=sys.stderr)
+            break
 
     # Summary table
     lines.append("| Team | Status | Pass | Fail | Skip | Progress |")
