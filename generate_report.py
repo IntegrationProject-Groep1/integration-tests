@@ -12,7 +12,6 @@ import sys
 import json
 import re
 import os
-from itertools import chain
 from pathlib import Path
 from datetime import datetime, timezone
 import xml.etree.ElementTree as ET
@@ -504,24 +503,26 @@ def _collect_repo_signal(repo_root: Path, team_repo: dict, now_utc: datetime) ->
 
     workflow_dir = repo_dir / ".github" / "workflows"
     if workflow_dir.exists():
-        data["workflows"] = sum(1 for _ in chain(workflow_dir.glob("*.yml"), workflow_dir.glob("*.yaml")))
+        data["workflows"] = sum(1 for f in workflow_dir.glob("*") if f.is_file() and f.suffix.lower() in {".yml", ".yaml"})
 
     tests_count = 0
     xsd_count = 0
-    for filepath in repo_dir.rglob("*"):
-        if not filepath.is_file():
-            continue
-        lower_name = filepath.name.lower()
-        if filepath.suffix.lower() == ".xsd":
-            xsd_count += 1
-        if lower_name.startswith("test_") and filepath.suffix.lower() == ".py":
-            tests_count += 1
-        elif ".test." in lower_name or ".spec." in lower_name:
-            tests_count += 1
+    excluded_dirs = {".git", "node_modules", "__pycache__", ".venv", "venv", ".pytest_cache"}
+    for root, dirs, files in os.walk(repo_dir):
+        dirs[:] = [d for d in dirs if d not in excluded_dirs]
+        for filename in files:
+            lower_name = filename.lower()
+            suffix = Path(filename).suffix.lower()
+            if suffix == ".xsd":
+                xsd_count += 1
+            if lower_name.startswith("test_") and suffix == ".py":
+                tests_count += 1
+            elif ".test." in lower_name or ".spec." in lower_name:
+                tests_count += 1
     data["tests"] = tests_count
     data["xsds"] = xsd_count
 
-    has_docker = any(repo_dir.glob("Dockerfile*")) or any(repo_dir.rglob("docker-compose*.yml")) or any(repo_dir.rglob("docker-compose*.yaml"))
+    has_docker = any(repo_dir.rglob("Dockerfile*")) or any(repo_dir.rglob("docker-compose*.y*ml"))
     data["docker"] = "✅" if has_docker else "⚠️"
 
     git_dir = repo_dir / ".git"
@@ -788,7 +789,12 @@ def generate_report(tests, dod_tests):
         lines.append(f"| {req_name} | {stats['pass']} | {stats['fail']} | {stats['skip']} | {status} |")
     lines.append("")
 
-    repo_root = Path(os.getenv("INTEGRATION_REPO_ROOT", Path(__file__).resolve().parent.parent))
+    repo_root = Path(
+        os.getenv(
+            "INTEGRATION_REPO_ROOT",
+            str(Path(__file__).resolve().parent.parent),
+        )
+    )
     now_utc = datetime.now(timezone.utc)
     lines.append("## Team Progress Snapshot")
     lines.append("")
