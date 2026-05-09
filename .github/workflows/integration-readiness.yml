@@ -194,7 +194,7 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y docker-compose
 
-      - name: Start full stack
+      - name: Resolve Docker Compose file
         run: |
           COMPOSE_FILE=$(find CRM -maxdepth 3 -type f \( -name "docker-compose.yml" -o -name "docker-compose.yaml" -o -name "compose.yml" -o -name "compose.yaml" \) | head -n 1)
           if [ -z "$COMPOSE_FILE" ]; then
@@ -203,6 +203,10 @@ jobs:
             exit 1
           fi
           echo "Using compose file: $COMPOSE_FILE"
+          echo "COMPOSE_FILE=$COMPOSE_FILE" >> "$GITHUB_ENV"
+
+      - name: Start full stack
+        run: |
           docker-compose -f "$COMPOSE_FILE" up -d
 
       - name: Wait for services
@@ -225,8 +229,7 @@ jobs:
       - name: Teardown stack
         if: always()
         run: |
-          COMPOSE_FILE=$(find CRM -maxdepth 3 -type f \( -name "docker-compose.yml" -o -name "docker-compose.yaml" -o -name "compose.yml" -o -name "compose.yaml" \) | head -n 1)
-          if [ -n "$COMPOSE_FILE" ]; then
+          if [ -n "${COMPOSE_FILE:-}" ] && [ -f "$COMPOSE_FILE" ]; then
             docker-compose -f "$COMPOSE_FILE" down
           else
             echo "Compose file not found during teardown; skipping docker-compose down"
