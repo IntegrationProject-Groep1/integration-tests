@@ -7,6 +7,7 @@
     <source>crm</source>
     <type>new_registration</type>
     <version>2.0</version>
+    <correlation_id>550e8400-e29b-41d4-a716-446655440001</correlation_id>
   </header>
   <body>
     <customer>
@@ -19,10 +20,10 @@
       </contact>
       <type>private</type>
       <session_id>87130566-b2db-4c6d-956e-4d17a831c949</session_id>
+      <payment_due>
+        <amount currency="eur">25.00</amount>
+        <status>unpaid</status>
+      </payment_due>
     </customer>
-    <payment_due>
-      <amount currency="eur">25.00</amount>
-      <status>unpaid</status>
-    </payment_due>
   </body>
 </message>

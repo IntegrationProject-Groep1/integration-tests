@@ -8,7 +8,14 @@
   </header>
   <body>
     <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-000000000001</identity_uuid>
-    <refund_amount currency="eur">5.50</refund_amount>
-    <reason>Customer requested refund for unused token</reason>
+    <refund_type>partial</refund_type>
+    <refund>
+      <amount currency="eur">5.50</amount>
+      <method>badge_wallet</method>
+      <reason>customer_request</reason>
+      <description>Customer requested refund for unused token.</description>
+    </refund>
+    <original_transaction_id>TXN-POS-00987</original_transaction_id>
+    <new_wallet_balance currency="eur">14.50</new_wallet_balance>
   </body>
 </message>

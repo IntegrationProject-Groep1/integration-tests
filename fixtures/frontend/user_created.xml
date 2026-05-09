@@ -1,14 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<user_created>
-    <header>
+<message>
+  <header>
     <message_id>123e4567-e89b-12d3-a456-426614174000</message_id>
     <timestamp>2026-05-07T12:00:00Z</timestamp>
-    <source>Frontend</source>
+    <source>frontend</source>
     <type>user_created</type>
     <version>2.0</version>
   </header>
-    <body>
-        <master_uuid>550e8400-e29b-41d4-a716-446655440020</master_uuid>
-
-    </body>
-</user_created>
+  <body>
+    <customer>
+      <identity_uuid>550e8400-e29b-41d4-a716-446655440020</identity_uuid>
+      <email>jan.janssens@example.com</email>
+      <date_of_birth>1990-01-01</date_of_birth>
+      <contact>
+        <first_name>Jan</first_name>
+        <last_name>Janssens</last_name>
+      </contact>
+      <type>private</type>
+    </customer>
+  </body>
+</message>

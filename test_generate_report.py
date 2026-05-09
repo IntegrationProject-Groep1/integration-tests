@@ -24,3 +24,6 @@ def test_generate_report_includes_failed_findings(tmp_path: Path):
     assert "Security checklist documentation is missing." in report
     assert "test_dod_checks.TestDoD_Infra::test_security_checks_documented" in report
     assert "Overall Progress" in report
+    assert "Service Communication Matrix" in report
+    assert "Functional Progress" in report
+    assert "Team Progress Snapshot" in report

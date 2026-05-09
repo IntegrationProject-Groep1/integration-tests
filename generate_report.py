@@ -443,6 +443,164 @@ TEAM_DISPLAY_NAMES = {
     "Identity Service": "Identity Service"
 }
 
+TEAM_REPOS = [
+    {"team": "Frontend", "repo_dir": "IP-groep1-frontend", "repo_name": "IP-groep1-frontend"},
+    {"team": "CRM", "repo_dir": "CRM", "repo_name": "CRM"},
+    {"team": "Kassa", "repo_dir": "Kassa", "repo_name": "Kassa"},
+    {"team": "Facturatie", "repo_dir": "Facturatie", "repo_name": "Facturatie"},
+    {"team": "Planning", "repo_dir": "Planning", "repo_name": "Planning"},
+    {"team": "Mailing", "repo_dir": "Mailing", "repo_name": "Mailing"},
+    {"team": "Monitoring", "repo_dir": "monitoring", "repo_name": "monitoring"},
+    {"team": "Infra", "repo_dir": "Infra", "repo_name": "Infra"},
+    {"team": "Heartbeat", "repo_dir": "heartbeat", "repo_name": "heartbeat"},
+    {"team": "Identity Service", "repo_dir": "identity-service", "repo_name": "identity-service"},
+    {"team": "Contract (shared)", "repo_dir": "xml-xsd-contract", "repo_name": "xml-xsd-contract"},
+]
+
+FUNCTIONAL_REQUIREMENTS = [
+    {"name": "Registratie & profiel", "flow_prefixes": ["R·", "N·", "B·"]},
+    {"name": "Planning (sessies)", "flow_prefixes": ["S·"]},
+    {"name": "Kassa & consumpties", "flow_prefixes": ["K·"]},
+    {"name": "Facturatie", "flow_prefixes": ["F·"]},
+    {"name": "Monitoring & foutafhandeling", "flow_prefixes": ["O·", "E·"]},
+    {"name": "Mailing", "flow_prefixes": ["M·"]},
+]
+
+ACTIVITY_THRESHOLD_ACTIVE_DAYS = 2
+ACTIVITY_THRESHOLD_RECENT_DAYS = 7
+COMMUNICATION_EXCLUDED_RECEIVERS = {"Architectuur", "Cross-team"}
+COMMUNICATION_EXCLUDED_SENDERS = {"Alle teams"}
+
+
+def _should_exclude_communication_pair(sender: str, receiver: str) -> bool:
+    return (
+        not sender
+        or not receiver
+        or sender == receiver
+        or "↔" in sender
+        or sender in COMMUNICATION_EXCLUDED_SENDERS
+        or receiver in COMMUNICATION_EXCLUDED_RECEIVERS
+    )
+
+
+def _collect_repo_signal(repo_root: Path, team_repo: dict, now_utc: datetime) -> dict:
+    repo_dir = repo_root / team_repo["repo_dir"]
+    exists = repo_dir.exists() and repo_dir.is_dir()
+    data = {
+        "team": team_repo["team"],
+        "repo_name": team_repo["repo_name"],
+        "checkout": "✅" if exists else "❌",
+        "last_commit": "—",
+        "activity": "Missing",
+        "workflows": 0,
+        "tests": 0,
+        "xsds": 0,
+        "docker": "—",
+    }
+
+    if not exists:
+        return data
+
+    workflow_dir = repo_dir / ".github" / "workflows"
+    if workflow_dir.exists():
+        data["workflows"] = sum(1 for f in workflow_dir.glob("*") if f.is_file() and f.suffix.lower() in {".yml", ".yaml"})
+
+    tests_count = 0
+    xsd_count = 0
+    excluded_dirs = {".git", "node_modules", "__pycache__", ".venv", "venv", ".pytest_cache"}
+    for root, dirs, files in os.walk(repo_dir):
+        dirs[:] = [d for d in dirs if d not in excluded_dirs]
+        for filename in files:
+            lower_name = filename.lower()
+            suffix = Path(filename).suffix.lower()
+            if suffix == ".xsd":
+                xsd_count += 1
+            if lower_name.startswith("test_") and suffix == ".py":
+                tests_count += 1
+            elif ".test." in lower_name or ".spec." in lower_name:
+                tests_count += 1
+    data["tests"] = tests_count
+    data["xsds"] = xsd_count
+
+    has_docker = any(repo_dir.rglob("Dockerfile*")) or any(repo_dir.rglob("docker-compose*.y*ml"))
+    data["docker"] = "✅" if has_docker else "⚠️"
+
+    git_dir = repo_dir / ".git"
+    if not git_dir.exists():
+        data["activity"] = "No git metadata"
+        return data
+
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(repo_dir), "log", "-1", "--format=%cI"],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=10,
+        )
+        commit_iso = (result.stdout or "").strip()
+        if commit_iso:
+            dt = datetime.fromisoformat(commit_iso.replace("Z", "+00:00"))
+            days_ago = (now_utc - dt.astimezone(timezone.utc)).days
+            data["last_commit"] = dt.astimezone(timezone.utc).strftime("%Y-%m-%d")
+            if days_ago <= ACTIVITY_THRESHOLD_ACTIVE_DAYS:
+                data["activity"] = "Active"
+            elif days_ago <= ACTIVITY_THRESHOLD_RECENT_DAYS:
+                data["activity"] = "Recent"
+            else:
+                data["activity"] = "Stale"
+        else:
+            data["activity"] = "Unknown"
+    except Exception:
+        data["activity"] = "Unknown"
+
+    return data
+
+
+def _build_communication_matrix(tests):
+    matrix = {}
+    for test in tests:
+        class_name = classify_test(test["name"])
+        info = TEAM_MAP.get(class_name)
+        if not info:
+            continue
+
+        sender = info.get("sender", "")
+        receiver = info.get("receiver", "")
+        if _should_exclude_communication_pair(sender, receiver):
+            continue
+
+        key = (sender, receiver)
+        if key not in matrix:
+            matrix[key] = {"pass": 0, "fail": 0, "skip": 0}
+        if test["status"] == "PASSED":
+            matrix[key]["pass"] += 1
+        elif test["status"] in {"FAILED", "ERROR"}:
+            matrix[key]["fail"] += 1
+        else:
+            matrix[key]["skip"] += 1
+    return matrix
+
+
+def _build_functionality_progress(tests):
+    req_stats = {req["name"]: {"pass": 0, "fail": 0, "skip": 0} for req in FUNCTIONAL_REQUIREMENTS}
+    for test in tests:
+        class_name = classify_test(test["name"])
+        info = TEAM_MAP.get(class_name)
+        if not info:
+            continue
+        flow = info.get("flow", "")
+        for req in FUNCTIONAL_REQUIREMENTS:
+            if any(flow.startswith(prefix) for prefix in req["flow_prefixes"]):
+                if test["status"] == "PASSED":
+                    req_stats[req["name"]]["pass"] += 1
+                elif test["status"] in {"FAILED", "ERROR"}:
+                    req_stats[req["name"]]["fail"] += 1
+                else:
+                    req_stats[req["name"]]["skip"] += 1
+                break
+    return req_stats
+
 
 def classify_test(test_name: str):
     """Extract class name from pytest test identifier.
@@ -591,6 +749,63 @@ def generate_report(tests, dod_tests):
                 status = "🟡 Partial"
             lines.append(f"| **{team}** | {status} | {s['pass']} | {s['fail']} | {s['skip']} | {team_pct}% |")
 
+    lines.append("")
+
+    communication_matrix = _build_communication_matrix(tests)
+    lines.append("## Service Communication Matrix")
+    lines.append("")
+    lines.append("| Sender | Receiver | Pass | Fail | Skip | Status |")
+    lines.append("|--------|----------|------|------|------|--------|")
+    if communication_matrix:
+        for (sender, receiver), stats in sorted(communication_matrix.items()):
+            if stats["pass"] > 0 and stats["fail"] == 0:
+                status = "✅ Can communicate"
+            elif stats["pass"] > 0 and stats["fail"] > 0:
+                status = "🟡 Partial"
+            elif stats["fail"] > 0:
+                status = "❌ Blocked"
+            else:
+                status = "⏭️ Waiting"
+            lines.append(f"| {sender} | {receiver} | {stats['pass']} | {stats['fail']} | {stats['skip']} | {status} |")
+    else:
+        lines.append("| — | — | 0 | 0 | 0 | No integration test data |")
+    lines.append("")
+
+    functionality_progress = _build_functionality_progress(tests)
+    lines.append("## Functional Progress")
+    lines.append("")
+    lines.append("| Requirement area | Pass | Fail | Skip | Status |")
+    lines.append("|------------------|------|------|------|--------|")
+    for req_name, stats in functionality_progress.items():
+        total_req = stats["pass"] + stats["fail"] + stats["skip"]
+        if total_req == 0:
+            status = "⚪ Not covered"
+        elif stats["fail"] == 0 and stats["pass"] > 0:
+            status = "🟢 Good"
+        elif stats["pass"] > 0:
+            status = "🟡 In progress"
+        else:
+            status = "🔴 Needs attention"
+        lines.append(f"| {req_name} | {stats['pass']} | {stats['fail']} | {stats['skip']} | {status} |")
+    lines.append("")
+
+    repo_root = Path(
+        os.getenv(
+            "INTEGRATION_REPO_ROOT",
+            str(Path(__file__).resolve().parent.parent),
+        )
+    )
+    now_utc = datetime.now(timezone.utc)
+    lines.append("## Team Progress Snapshot")
+    lines.append("")
+    lines.append("| Team | Repository | Checkout | Last commit (UTC) | Activity | CI workflows | Tests | XSD files | Container readiness |")
+    lines.append("|------|------------|----------|-------------------|----------|--------------|-------|-----------|---------------------|")
+    for team_repo in TEAM_REPOS:
+        signal = _collect_repo_signal(repo_root, team_repo, now_utc)
+        lines.append(
+            f"| {signal['team']} | {signal['repo_name']} | {signal['checkout']} | {signal['last_commit']} | {signal['activity']} | "
+            f"{signal['workflows']} | {signal['tests']} | {signal['xsds']} | {signal['docker']} |"
+        )
     lines.append("")
 
     # Detailed breakdown per team

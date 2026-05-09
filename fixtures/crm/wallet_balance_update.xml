@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<wallet_balance_update>
-    <header>
+<message>
+  <header>
     <message_id>123e4567-e89b-12d3-a456-426614174000</message_id>
     <timestamp>2026-05-07T12:00:00Z</timestamp>
-    <source>CRM</source>
+    <source>crm</source>
     <type>wallet_balance_update</type>
     <version>2.0</version>
   </header>
-    <body>
-        <new_balance>50.00</new_balance>
-        <authority>crm</authority>
-
-    </body>
-</wallet_balance_update>
+  <body>
+    <identity_uuid>019681a0-1234-7abc-8def-0123456789ab</identity_uuid>
+    <wallet_balance currency="eur">50.00</wallet_balance>
+    <authority>crm</authority>
+    <status>active</status>
+  </body>
+</message>
