@@ -196,8 +196,14 @@ jobs:
 
       - name: Start full stack
         run: |
-          cd ..
-          docker-compose up -d
+          COMPOSE_FILE=$(find CRM -maxdepth 3 -type f \( -name "docker-compose.yml" -o -name "docker-compose.yaml" -o -name "compose.yml" -o -name "compose.yaml" \) | head -n 1)
+          if [ -z "$COMPOSE_FILE" ]; then
+            echo "No Docker Compose file found in CRM checkout"
+            ls -la CRM || true
+            exit 1
+          fi
+          echo "Using compose file: $COMPOSE_FILE"
+          docker-compose -f "$COMPOSE_FILE" up -d
 
       - name: Wait for services
         run: |
@@ -219,5 +225,9 @@ jobs:
       - name: Teardown stack
         if: always()
         run: |
-          cd ..
-          docker-compose down
+          COMPOSE_FILE=$(find CRM -maxdepth 3 -type f \( -name "docker-compose.yml" -o -name "docker-compose.yaml" -o -name "compose.yml" -o -name "compose.yaml" \) | head -n 1)
+          if [ -n "$COMPOSE_FILE" ]; then
+            docker-compose -f "$COMPOSE_FILE" down
+          else
+            echo "Compose file not found during teardown; skipping docker-compose down"
+          fi
