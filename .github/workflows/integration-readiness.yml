@@ -177,6 +177,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: integration-tests
     if: github.event_name == 'workflow_dispatch'
+    env:
+      COMPOSE_SEARCH_MAX_DEPTH: "3"
     steps:
       - name: Checkout all repos
         uses: actions/checkout@v4
@@ -196,10 +198,9 @@ jobs:
 
       - name: Resolve Docker Compose file
         run: |
-          SEARCH_MAX_DEPTH=3
           COMPOSE_FILE=""
           for CANDIDATE in docker-compose.yml docker-compose.yaml compose.yml compose.yaml; do
-            MATCH=$(find CRM -maxdepth "$SEARCH_MAX_DEPTH" -type f -name "$CANDIDATE" | sort | head -n 1)
+            MATCH=$(find CRM -maxdepth "$COMPOSE_SEARCH_MAX_DEPTH" -type f -name "$CANDIDATE" | sort | head -n 1)
             if [ -n "$MATCH" ]; then
               COMPOSE_FILE="$MATCH"
               break
@@ -248,7 +249,7 @@ jobs:
           TEARDOWN_COMPOSE_FILE="${COMPOSE_FILE:-}"
           if [ -z "$TEARDOWN_COMPOSE_FILE" ] || [ ! -f "$TEARDOWN_COMPOSE_FILE" ]; then
             for CANDIDATE in docker-compose.yml docker-compose.yaml compose.yml compose.yaml; do
-              MATCH=$(find CRM -maxdepth 3 -type f -name "$CANDIDATE" | sort | head -n 1)
+              MATCH=$(find CRM -maxdepth "$COMPOSE_SEARCH_MAX_DEPTH" -type f -name "$CANDIDATE" | sort | head -n 1)
               if [ -n "$MATCH" ]; then
                 TEARDOWN_COMPOSE_FILE="$MATCH"
                 break
