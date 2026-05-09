@@ -12,7 +12,6 @@
   <body>
     <campaign_id>invoice-delivery-2026-05</campaign_id>
     <subject>Uw factuur INV-2026-0042 — Shift Festival 2026</subject>
-    <template_id>invoice_ready</template_id>
     <mail_type>invoice_ready</mail_type>
     <recipients>
       <recipient>

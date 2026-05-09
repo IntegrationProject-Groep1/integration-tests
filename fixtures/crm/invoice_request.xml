@@ -12,8 +12,10 @@
   <body>
     <identity_uuid>019681a0-1234-7abc-8def-0123456789ab</identity_uuid>
     <invoice_data>
-      <first_name>Jan</first_name>
-      <last_name>Janssens</last_name>
+      <contact>
+        <first_name>Jan</first_name>
+        <last_name>Janssens</last_name>
+      </contact>
       <email>jan@bedrijf.be</email>
       <address>
         <street>Nijverheidskaai</street>

@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<system_error>
-    <header>
+<message>
+  <header>
     <message_id>123e4567-e89b-12d3-a456-426614174000</message_id>
     <timestamp>2026-05-07T12:00:00Z</timestamp>
-    <source>Kassa</source>
+    <source>kassa</source>
     <type>system_error</type>
     <version>2.0</version>
   </header>
-    <body>
-        <code>500</code>
-        <message>DB Down</message>
-        <severity>high</severity>
-
-    </body>
-</system_error>
+  <body>
+    <error_code>KASSA_DB_DOWN</error_code>
+    <error_description>Database connection unavailable.</error_description>
+    <component>kassa-api</component>
+    <related_message_id>550e8400-e29b-41d4-a716-446655440003</related_message_id>
+  </body>
+</message>

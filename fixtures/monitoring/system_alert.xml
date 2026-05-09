@@ -1,15 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<system_alert>
-    <header>
-    <message_id>123e4567-e89b-12d3-a456-426614174000</message_id>
-    <timestamp>2026-05-07T12:00:00Z</timestamp>
-    <source>Monitoring</source>
-    <type>system_alert</type>
-    <version>2.0</version>
-  </header>
-    <body>
-        <severity>high</severity>
-        <message>Disk full</message>
-
-    </body>
-</system_alert>
+<alert>
+  <type>HEARTBEAT_CRITICAL</type>
+  <system>monitoring</system>
+  <message>Disk full</message>
+  <timestamp>2026-05-07T12:00:00Z</timestamp>
+</alert>

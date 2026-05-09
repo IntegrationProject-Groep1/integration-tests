@@ -8,7 +8,8 @@
   </header>
   <body>
     <identity_uuid>e8b27c1d-4f2a-4b3e-9c5f-000000000001</identity_uuid>
-    <lease_id>LEASE-555</lease_id>
     <final_balance currency="eur">0.00</final_balance>
+    <lease_id>LEASE-555</lease_id>
+    <transaction_count>3</transaction_count>
   </body>
 </message>

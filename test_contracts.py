@@ -639,6 +639,5 @@ class TestN1_CRMToPlanning_SessionRegistrationConfirmed:
     """
     def test_crm_session_registration_confirmed_exists(self):
         xml = (FIXTURES / "crm" / "session_registration_confirmed.xml").read_text()
-        # This often uses calendar_invite_confirmed schema
-        valid, err = validate_xml_against_xsd(xml, PLANNING_XSD / "calendar_invite_confirmed.xsd")
+        valid, err = validate_xml_against_xsd(xml, PLANNING_XSD / "session_registration_confirmed.xsd")
         assert valid, f"CRM session_registration_confirmed fails Planning XSD:\n{err}"

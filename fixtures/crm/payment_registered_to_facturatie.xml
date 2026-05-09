@@ -10,14 +10,14 @@
     <correlation_id>a7e67518-df31-4d33-9693-02d032c39d54</correlation_id>
   </header>
   <body>
-    <payment_context>registration</payment_context>
     <identity_uuid>019681a0-1234-7abc-8def-0123456789ab</identity_uuid>
     <invoice>
       <id>INV-2026-0042</id>
-      <status>paid</status>
       <amount_paid currency="eur">25.00</amount_paid>
+      <status>paid</status>
       <due_date>2026-05-15</due_date>
     </invoice>
+    <payment_context>registration</payment_context>
     <transaction>
       <id>TXN-POS-00123</id>
       <payment_method>on_site</payment_method>

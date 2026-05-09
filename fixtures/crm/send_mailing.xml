@@ -1,16 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<send_mailing>
-    <header>
+<message>
+  <header>
     <message_id>123e4567-e89b-12d3-a456-426614174000</message_id>
     <timestamp>2026-05-07T12:00:00Z</timestamp>
-    <source>CRM</source>
+    <source>crm</source>
     <type>send_mailing</type>
     <version>2.0</version>
+    <correlation_id>550e8400-e29b-41d4-a716-446655440055</correlation_id>
   </header>
-    <body>
-        <recipient>test@test.com</recipient>
-        <subject>Welcome</subject>
-        <template>welcome</template>
-
-    </body>
-</send_mailing>
+  <body>
+    <campaign_id>welcome-2026</campaign_id>
+    <subject>Welcome to Shift Festival 2026</subject>
+    <mail_type>registration_confirmation</mail_type>
+    <recipients>
+      <recipient>
+        <email>test@test.com</email>
+        <identity_uuid>019681a0-1234-7abc-8def-0123456789ab</identity_uuid>
+        <contact>
+          <first_name>Test</first_name>
+          <last_name>User</last_name>
+        </contact>
+      </recipient>
+    </recipients>
+    <template_data>{"event":"Shift Festival 2026"}</template_data>
+  </body>
+</message>
