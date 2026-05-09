@@ -109,6 +109,14 @@ jobs:
           path: Infra
           token: ${{ secrets.PAT_TOKEN }}
 
+      - name: Checkout XML/XSD Contract
+        uses: actions/checkout@v4
+        continue-on-error: true
+        with:
+          repository: IntegrationProject-Groep1/xml-xsd-contract
+          path: xml-xsd-contract
+          token: ${{ secrets.PAT_TOKEN }}
+
       - name: Debug - List checked out directories
         run: |
           echo "=== Workspace structure ==="

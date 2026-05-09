@@ -122,6 +122,32 @@ Each team gets a status badge based on their integration contracts:
 
 The report also includes DoD checks for each team (like "Docker Compose exists", "DLQ configured", etc.). These verify project readiness beyond just XSD validation.
 
+### Service Communication Matrix
+
+The report now includes a sender→receiver matrix based on contract test outcomes:
+
+- **✅ Can communicate**: one or more passing tests and no failures
+- **🟡 Partial**: at least one pass and at least one failure
+- **❌ Blocked**: failures and no successful communication proof
+- **⏭️ Waiting**: only skipped/missing-schema tests
+
+### Functional Progress
+
+Functional status is grouped by requirement area (registration/profile, planning, kassa/consumption, facturatie, monitoring/error handling, mailing) so you can quickly see where functionality is already proven by tests and where it still fails or is missing.
+
+### Team Progress Snapshot
+
+A per-repository progress table is included in every run with:
+
+- checkout availability (repo reachable)
+- latest commit recency (activity signal)
+- CI workflow count
+- test file count
+- XSD file count
+- container readiness signal (Dockerfile/docker-compose presence)
+
+This now also includes the shared `xml-xsd-contract` repository.
+
 ## How to Add Tests for Your Team
 
 ### If you're a **sender** (your team produces XML):

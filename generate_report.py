@@ -443,6 +443,134 @@ TEAM_DISPLAY_NAMES = {
     "Identity Service": "Identity Service"
 }
 
+TEAM_REPOS = [
+    {"team": "Frontend", "repo_dir": "IP-groep1-frontend", "repo_name": "IP-groep1-frontend"},
+    {"team": "CRM", "repo_dir": "CRM", "repo_name": "CRM"},
+    {"team": "Kassa", "repo_dir": "Kassa", "repo_name": "Kassa"},
+    {"team": "Facturatie", "repo_dir": "Facturatie", "repo_name": "Facturatie"},
+    {"team": "Planning", "repo_dir": "Planning", "repo_name": "Planning"},
+    {"team": "Mailing", "repo_dir": "Mailing", "repo_name": "Mailing"},
+    {"team": "Monitoring", "repo_dir": "monitoring", "repo_name": "monitoring"},
+    {"team": "Infra", "repo_dir": "Infra", "repo_name": "Infra"},
+    {"team": "Heartbeat", "repo_dir": "heartbeat", "repo_name": "heartbeat"},
+    {"team": "Identity Service", "repo_dir": "identity-service", "repo_name": "identity-service"},
+    {"team": "Contract (shared)", "repo_dir": "xml-xsd-contract", "repo_name": "xml-xsd-contract"},
+]
+
+FUNCTIONAL_REQUIREMENTS = [
+    {"name": "Registratie & profiel", "flow_prefixes": ["R·", "N·", "B·"]},
+    {"name": "Planning (sessies)", "flow_prefixes": ["S·"]},
+    {"name": "Kassa & consumpties", "flow_prefixes": ["K·"]},
+    {"name": "Facturatie", "flow_prefixes": ["F·"]},
+    {"name": "Monitoring & foutafhandeling", "flow_prefixes": ["O·", "E·"]},
+    {"name": "Mailing", "flow_prefixes": ["M·"]},
+]
+
+
+def _collect_repo_signal(repo_root: Path, team_repo: dict) -> dict:
+    repo_dir = repo_root / team_repo["repo_dir"]
+    exists = repo_dir.exists() and repo_dir.is_dir()
+    data = {
+        "team": team_repo["team"],
+        "repo_name": team_repo["repo_name"],
+        "checkout": "✅" if exists else "❌",
+        "last_commit": "—",
+        "activity": "Missing",
+        "workflows": 0,
+        "tests": 0,
+        "xsds": 0,
+        "docker": "—",
+    }
+
+    if not exists:
+        return data
+
+    workflow_dir = repo_dir / ".github" / "workflows"
+    data["workflows"] = len(list(workflow_dir.glob("*.yml"))) + len(list(workflow_dir.glob("*.yaml")))
+    data["tests"] = len(list(repo_dir.rglob("test_*.py"))) + len(list(repo_dir.rglob("*.test.*"))) + len(list(repo_dir.rglob("*.spec.*")))
+    data["xsds"] = len(list(repo_dir.rglob("*.xsd")))
+
+    has_docker = len(list(repo_dir.glob("Dockerfile*"))) > 0 or len(list(repo_dir.rglob("docker-compose*.yml"))) > 0 or len(list(repo_dir.rglob("docker-compose*.yaml"))) > 0
+    data["docker"] = "✅" if has_docker else "⚠️"
+
+    git_dir = repo_dir / ".git"
+    if not git_dir.exists():
+        data["activity"] = "No git metadata"
+        return data
+
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(repo_dir), "log", "-1", "--format=%cI"],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=10,
+        )
+        commit_iso = (result.stdout or "").strip()
+        if commit_iso:
+            dt = datetime.fromisoformat(commit_iso.replace("Z", "+00:00"))
+            days_ago = (datetime.now(timezone.utc) - dt.astimezone(timezone.utc)).days
+            data["last_commit"] = dt.astimezone(timezone.utc).strftime("%Y-%m-%d")
+            if days_ago <= 2:
+                data["activity"] = "Active"
+            elif days_ago <= 7:
+                data["activity"] = "Recent"
+            else:
+                data["activity"] = "Stale"
+        else:
+            data["activity"] = "Unknown"
+    except Exception:
+        data["activity"] = "Unknown"
+
+    return data
+
+
+def _build_communication_matrix(tests):
+    matrix = {}
+    for test in tests:
+        class_name = classify_test(test["name"])
+        info = TEAM_MAP.get(class_name)
+        if not info:
+            continue
+
+        sender = info.get("sender", "")
+        receiver = info.get("receiver", "")
+        if not sender or not receiver:
+            continue
+        if sender == receiver or "↔" in sender or sender == "Alle teams" or receiver in {"Architectuur", "Cross-team"}:
+            continue
+
+        key = (sender, receiver)
+        if key not in matrix:
+            matrix[key] = {"pass": 0, "fail": 0, "skip": 0}
+        if test["status"] == "PASSED":
+            matrix[key]["pass"] += 1
+        elif test["status"] in {"FAILED", "ERROR"}:
+            matrix[key]["fail"] += 1
+        else:
+            matrix[key]["skip"] += 1
+    return matrix
+
+
+def _build_functionality_progress(tests):
+    req_stats = {req["name"]: {"pass": 0, "fail": 0, "skip": 0} for req in FUNCTIONAL_REQUIREMENTS}
+    for test in tests:
+        class_name = classify_test(test["name"])
+        info = TEAM_MAP.get(class_name)
+        if not info:
+            continue
+        flow = info.get("flow", "")
+        for req in FUNCTIONAL_REQUIREMENTS:
+            if any(flow.startswith(prefix) for prefix in req["flow_prefixes"]):
+                if test["status"] == "PASSED":
+                    req_stats[req["name"]]["pass"] += 1
+                elif test["status"] in {"FAILED", "ERROR"}:
+                    req_stats[req["name"]]["fail"] += 1
+                else:
+                    req_stats[req["name"]]["skip"] += 1
+                break
+    return req_stats
+
 
 def classify_test(test_name: str):
     """Extract class name from pytest test identifier.
@@ -591,6 +719,57 @@ def generate_report(tests, dod_tests):
                 status = "🟡 Partial"
             lines.append(f"| **{team}** | {status} | {s['pass']} | {s['fail']} | {s['skip']} | {team_pct}% |")
 
+    lines.append("")
+
+    communication_matrix = _build_communication_matrix(tests)
+    lines.append("## Service Communication Matrix")
+    lines.append("")
+    lines.append("| Sender | Receiver | Pass | Fail | Skip | Status |")
+    lines.append("|--------|----------|------|------|------|--------|")
+    if communication_matrix:
+        for (sender, receiver), stats in sorted(communication_matrix.items()):
+            if stats["pass"] > 0 and stats["fail"] == 0:
+                status = "✅ Can communicate"
+            elif stats["pass"] > 0 and stats["fail"] > 0:
+                status = "🟡 Partial"
+            elif stats["fail"] > 0:
+                status = "❌ Blocked"
+            else:
+                status = "⏭️ Waiting"
+            lines.append(f"| {sender} | {receiver} | {stats['pass']} | {stats['fail']} | {stats['skip']} | {status} |")
+    else:
+        lines.append("| — | — | 0 | 0 | 0 | No integration test data |")
+    lines.append("")
+
+    functionality_progress = _build_functionality_progress(tests)
+    lines.append("## Functional Progress")
+    lines.append("")
+    lines.append("| Requirement area | Pass | Fail | Skip | Status |")
+    lines.append("|------------------|------|------|------|--------|")
+    for req_name, stats in functionality_progress.items():
+        total_req = stats["pass"] + stats["fail"] + stats["skip"]
+        if total_req == 0:
+            status = "⚪ Not covered"
+        elif stats["fail"] == 0 and stats["pass"] > 0:
+            status = "🟢 Good"
+        elif stats["pass"] > 0:
+            status = "🟡 In progress"
+        else:
+            status = "🔴 Needs attention"
+        lines.append(f"| {req_name} | {stats['pass']} | {stats['fail']} | {stats['skip']} | {status} |")
+    lines.append("")
+
+    repo_root = Path(os.getenv("INTEGRATION_REPO_ROOT", Path(__file__).resolve().parent.parent))
+    lines.append("## Team Progress Snapshot")
+    lines.append("")
+    lines.append("| Team | Repository | Checkout | Last commit (UTC) | Activity | CI workflows | Tests | XSD files | Container readiness |")
+    lines.append("|------|------------|----------|-------------------|----------|--------------|-------|-----------|---------------------|")
+    for team_repo in TEAM_REPOS:
+        signal = _collect_repo_signal(repo_root, team_repo)
+        lines.append(
+            f"| {signal['team']} | {signal['repo_name']} | {signal['checkout']} | {signal['last_commit']} | {signal['activity']} | "
+            f"{signal['workflows']} | {signal['tests']} | {signal['xsds']} | {signal['docker']} |"
+        )
     lines.append("")
 
     # Detailed breakdown per team
