@@ -197,7 +197,14 @@ jobs:
       - name: Resolve Docker Compose file
         run: |
           SEARCH_MAX_DEPTH=3
-          COMPOSE_FILE=$(find CRM -maxdepth "$SEARCH_MAX_DEPTH" -type f \( -name "docker-compose.yml" -o -name "docker-compose.yaml" -o -name "compose.yml" -o -name "compose.yaml" \) | head -n 1)
+          COMPOSE_FILE=""
+          for CANDIDATE in docker-compose.yml docker-compose.yaml compose.yml compose.yaml; do
+            MATCH=$(find CRM -maxdepth "$SEARCH_MAX_DEPTH" -type f -name "$CANDIDATE" | sort | head -n 1)
+            if [ -n "$MATCH" ]; then
+              COMPOSE_FILE="$MATCH"
+              break
+            fi
+          done
           if [ -z "$COMPOSE_FILE" ]; then
             echo "No Docker Compose file found in CRM checkout"
             if [ -d CRM ]; then
@@ -238,8 +245,22 @@ jobs:
       - name: Teardown stack
         if: always()
         run: |
-          if [ -n "${COMPOSE_FILE:-}" ] && [ -f "$COMPOSE_FILE" ]; then
-            docker-compose -f "$COMPOSE_FILE" down
+          TEARDOWN_COMPOSE_FILE="${COMPOSE_FILE:-}"
+          if [ -z "$TEARDOWN_COMPOSE_FILE" ] || [ ! -f "$TEARDOWN_COMPOSE_FILE" ]; then
+            for CANDIDATE in docker-compose.yml docker-compose.yaml compose.yml compose.yaml; do
+              MATCH=$(find CRM -maxdepth 3 -type f -name "$CANDIDATE" | sort | head -n 1)
+              if [ -n "$MATCH" ]; then
+                TEARDOWN_COMPOSE_FILE="$MATCH"
+                break
+              fi
+            done
+          fi
+          if [ -n "$TEARDOWN_COMPOSE_FILE" ] && [ -f "$TEARDOWN_COMPOSE_FILE" ]; then
+            echo "Using compose file for teardown: $TEARDOWN_COMPOSE_FILE"
+            docker-compose -f "$TEARDOWN_COMPOSE_FILE" down
+          elif [ -d CRM ]; then
+            echo "Compose file not found during teardown; showing CRM directory"
+            ls -la CRM
           else
-            echo "Compose file not found during teardown; skipping docker-compose down"
+            echo "Compose file not found during teardown and CRM directory is missing; skipping docker-compose down"
           fi
