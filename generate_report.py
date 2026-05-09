@@ -12,6 +12,7 @@ import sys
 import json
 import re
 import os
+from itertools import chain
 from pathlib import Path
 from datetime import datetime, timezone
 import xml.etree.ElementTree as ET
@@ -466,6 +467,22 @@ FUNCTIONAL_REQUIREMENTS = [
     {"name": "Mailing", "flow_prefixes": ["M·"]},
 ]
 
+ACTIVITY_THRESHOLD_ACTIVE_DAYS = 2
+ACTIVITY_THRESHOLD_RECENT_DAYS = 7
+COMMUNICATION_EXCLUDED_RECEIVERS = {"Architectuur", "Cross-team"}
+COMMUNICATION_EXCLUDED_SENDERS = {"Alle teams"}
+
+
+def _should_exclude_communication_pair(sender: str, receiver: str) -> bool:
+    return (
+        not sender
+        or not receiver
+        or sender == receiver
+        or "↔" in sender
+        or sender in COMMUNICATION_EXCLUDED_SENDERS
+        or receiver in COMMUNICATION_EXCLUDED_RECEIVERS
+    )
+
 
 def _collect_repo_signal(repo_root: Path, team_repo: dict, now_utc: datetime) -> dict:
     repo_dir = repo_root / team_repo["repo_dir"]
@@ -487,7 +504,7 @@ def _collect_repo_signal(repo_root: Path, team_repo: dict, now_utc: datetime) ->
 
     workflow_dir = repo_dir / ".github" / "workflows"
     if workflow_dir.exists():
-        data["workflows"] = len(list(workflow_dir.glob("*.yml"))) + len(list(workflow_dir.glob("*.yaml")))
+        data["workflows"] = sum(1 for _ in chain(workflow_dir.glob("*.yml"), workflow_dir.glob("*.yaml")))
 
     tests_count = 0
     xsd_count = 0
@@ -525,9 +542,9 @@ def _collect_repo_signal(repo_root: Path, team_repo: dict, now_utc: datetime) ->
             dt = datetime.fromisoformat(commit_iso.replace("Z", "+00:00"))
             days_ago = (now_utc - dt.astimezone(timezone.utc)).days
             data["last_commit"] = dt.astimezone(timezone.utc).strftime("%Y-%m-%d")
-            if days_ago <= 2:
+            if days_ago <= ACTIVITY_THRESHOLD_ACTIVE_DAYS:
                 data["activity"] = "Active"
-            elif days_ago <= 7:
+            elif days_ago <= ACTIVITY_THRESHOLD_RECENT_DAYS:
                 data["activity"] = "Recent"
             else:
                 data["activity"] = "Stale"
@@ -549,9 +566,7 @@ def _build_communication_matrix(tests):
 
         sender = info.get("sender", "")
         receiver = info.get("receiver", "")
-        if not sender or not receiver:
-            continue
-        if sender == receiver or "↔" in sender or sender == "Alle teams" or receiver in {"Architectuur", "Cross-team"}:
+        if _should_exclude_communication_pair(sender, receiver):
             continue
 
         key = (sender, receiver)
