@@ -222,6 +222,23 @@ jobs:
             echo "EOF"
           } >> "$GITHUB_ENV"
 
+      - name: Ensure CRM env file exists
+        run: |
+          COMPOSE_DIR="$(dirname "$COMPOSE_FILE")"
+          ENV_FILE="$COMPOSE_DIR/.env"
+          if [ -f "$ENV_FILE" ]; then
+            echo "Using existing env file: $ENV_FILE"
+          elif [ -f "$COMPOSE_DIR/.env.example" ]; then
+            cp "$COMPOSE_DIR/.env.example" "$ENV_FILE"
+            echo "Created env file from .env.example: $ENV_FILE"
+          elif [ -f "$COMPOSE_DIR/.env.template" ]; then
+            cp "$COMPOSE_DIR/.env.template" "$ENV_FILE"
+            echo "Created env file from .env.template: $ENV_FILE"
+          else
+            touch "$ENV_FILE"
+            echo "Created empty env file: $ENV_FILE"
+          fi
+
       - name: Start full stack
         run: |
           docker-compose -f "$COMPOSE_FILE" up -d
