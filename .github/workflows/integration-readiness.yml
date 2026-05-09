@@ -196,10 +196,15 @@ jobs:
 
       - name: Resolve Docker Compose file
         run: |
-          COMPOSE_FILE=$(find CRM -maxdepth 3 -type f \( -name "docker-compose.yml" -o -name "docker-compose.yaml" -o -name "compose.yml" -o -name "compose.yaml" \) | head -n 1)
+          SEARCH_MAX_DEPTH=3
+          COMPOSE_FILE=$(find CRM -maxdepth "$SEARCH_MAX_DEPTH" -type f \( -name "docker-compose.yml" -o -name "docker-compose.yaml" -o -name "compose.yml" -o -name "compose.yaml" \) | head -n 1)
           if [ -z "$COMPOSE_FILE" ]; then
             echo "No Docker Compose file found in CRM checkout"
-            ls -la CRM || true
+            if [ -d CRM ]; then
+              ls -la CRM
+            else
+              echo "CRM checkout directory is missing"
+            fi
             exit 1
           fi
           echo "Using compose file: $COMPOSE_FILE"
