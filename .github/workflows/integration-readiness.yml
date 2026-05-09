@@ -203,7 +203,11 @@ jobs:
             exit 1
           fi
           echo "Using compose file: $COMPOSE_FILE"
-          echo "COMPOSE_FILE=$COMPOSE_FILE" >> "$GITHUB_ENV"
+          {
+            echo "COMPOSE_FILE<<EOF"
+            echo "$COMPOSE_FILE"
+            echo "EOF"
+          } >> "$GITHUB_ENV"
 
       - name: Start full stack
         run: |
