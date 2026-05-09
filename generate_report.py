@@ -467,7 +467,7 @@ FUNCTIONAL_REQUIREMENTS = [
 ]
 
 
-def _collect_repo_signal(repo_root: Path, team_repo: dict) -> dict:
+def _collect_repo_signal(repo_root: Path, team_repo: dict, now_utc: datetime) -> dict:
     repo_dir = repo_root / team_repo["repo_dir"]
     exists = repo_dir.exists() and repo_dir.is_dir()
     data = {
@@ -486,11 +486,25 @@ def _collect_repo_signal(repo_root: Path, team_repo: dict) -> dict:
         return data
 
     workflow_dir = repo_dir / ".github" / "workflows"
-    data["workflows"] = len(list(workflow_dir.glob("*.yml"))) + len(list(workflow_dir.glob("*.yaml")))
-    data["tests"] = len(list(repo_dir.rglob("test_*.py"))) + len(list(repo_dir.rglob("*.test.*"))) + len(list(repo_dir.rglob("*.spec.*")))
-    data["xsds"] = len(list(repo_dir.rglob("*.xsd")))
+    if workflow_dir.exists():
+        data["workflows"] = len(list(workflow_dir.glob("*.yml"))) + len(list(workflow_dir.glob("*.yaml")))
 
-    has_docker = len(list(repo_dir.glob("Dockerfile*"))) > 0 or len(list(repo_dir.rglob("docker-compose*.yml"))) > 0 or len(list(repo_dir.rglob("docker-compose*.yaml"))) > 0
+    tests_count = 0
+    xsd_count = 0
+    for filepath in repo_dir.rglob("*"):
+        if not filepath.is_file():
+            continue
+        lower_name = filepath.name.lower()
+        if filepath.suffix.lower() == ".xsd":
+            xsd_count += 1
+        if lower_name.startswith("test_") and filepath.suffix.lower() == ".py":
+            tests_count += 1
+        elif ".test." in lower_name or ".spec." in lower_name:
+            tests_count += 1
+    data["tests"] = tests_count
+    data["xsds"] = xsd_count
+
+    has_docker = any(repo_dir.glob("Dockerfile*")) or any(repo_dir.rglob("docker-compose*.yml")) or any(repo_dir.rglob("docker-compose*.yaml"))
     data["docker"] = "✅" if has_docker else "⚠️"
 
     git_dir = repo_dir / ".git"
@@ -509,7 +523,7 @@ def _collect_repo_signal(repo_root: Path, team_repo: dict) -> dict:
         commit_iso = (result.stdout or "").strip()
         if commit_iso:
             dt = datetime.fromisoformat(commit_iso.replace("Z", "+00:00"))
-            days_ago = (datetime.now(timezone.utc) - dt.astimezone(timezone.utc)).days
+            days_ago = (now_utc - dt.astimezone(timezone.utc)).days
             data["last_commit"] = dt.astimezone(timezone.utc).strftime("%Y-%m-%d")
             if days_ago <= 2:
                 data["activity"] = "Active"
@@ -760,12 +774,13 @@ def generate_report(tests, dod_tests):
     lines.append("")
 
     repo_root = Path(os.getenv("INTEGRATION_REPO_ROOT", Path(__file__).resolve().parent.parent))
+    now_utc = datetime.now(timezone.utc)
     lines.append("## Team Progress Snapshot")
     lines.append("")
     lines.append("| Team | Repository | Checkout | Last commit (UTC) | Activity | CI workflows | Tests | XSD files | Container readiness |")
     lines.append("|------|------------|----------|-------------------|----------|--------------|-------|-----------|---------------------|")
     for team_repo in TEAM_REPOS:
-        signal = _collect_repo_signal(repo_root, team_repo)
+        signal = _collect_repo_signal(repo_root, team_repo, now_utc)
         lines.append(
             f"| {signal['team']} | {signal['repo_name']} | {signal['checkout']} | {signal['last_commit']} | {signal['activity']} | "
             f"{signal['workflows']} | {signal['tests']} | {signal['xsds']} | {signal['docker']} |"
